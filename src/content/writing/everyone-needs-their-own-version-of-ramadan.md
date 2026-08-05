@@ -1,10 +1,14 @@
 ---
-title: Everyone needs their own version of Ramadan
+title: "Everyone needs their own version of Ramadan"
 date: 2026-03-25
 ---
 
-The essay opens here. First paragraph sets the terms and says what the piece is about.
+When I have to explain to a non-muslim what Ramadan is, the quickest and most digestible answer is that we simply don't eat from sunrise to sunset for thirty days. By no means do I bend the truth here, but I just leave out some of the less tangible goals of the holy month. Ramadan isn't just about abstaining from physical consumption, but it's a month of reflection, spirituality, and a time to take a step back from an overstimulating life. We take the month as a sanctuary to spend time away from distractions and be closer to our beliefs and God. I spent a lot of time with friends and loved ones, I tried to get away from noise, and I looked to improve my connection to something beyond this world.
 
-The middle works the idea over — an example, an objection, the part that changes your mind.
+Ramadan creates this space where intention goes a *long way*. Even if we put God in the dark, you can take the month to focus on what matters to you, control emotions, and navigate the difficulties and pleasures in your life. The best part of Ramadan, though, is that you can do all these things alongside a community that loves you, cherishes you, and respects you. There's no judgment, only brothers and sisters trying to love and grow.
 
-The close lands it without summarizing.
+But the energy that we cast and cultivate together during Ramadan shouldn't be specific to the month. There's a term called the "Ramadani Muslim", essentially, it's the Muslim who locks in for the month, prays more, gives more time to people, donates more, and controls their impulses, but as soon as the month ends, they return to bad habits. This is the opposite of what we should strive for.
+
+My claim, though, is that everyone should seek their own form of Ramadan in their lives because that level of focus, spirituality, and discipline, not necessarily through a religious ritual, but from their own willpower, looking to better themselves, creates habits that transcend any setback and bring you closer to your goals. We get so many opportunities to do right and to act in this powerful way, but why do we give it up when the structure leaves us? I've learned an important lesson over the last few months, consistency beats out discipline. You can be disciplined for one month during Ramadan, make robust progress, but lose as soon as the curated setup comes to an end. On the other hand, make slow progress in month one, but continue that for six months to a year to five years, and you have an unshakeable system.
+
+We live in a world that profits off your inconsistency, and discipline is the only thing standing between you and that trap. Ramadan is a gift, but so is any moment where you choose to be intentional without a structure. The "Ramadani Muslim" doesn't have to be you, and honestly, it doesn't have to be a Muslim thing at all. We all fall back to comfort when the structure leaves us, the difference is how quickly you find your footing again. Ride the momentum up, and slow the inevitable steps back, it's not a religious question, it's a human one.

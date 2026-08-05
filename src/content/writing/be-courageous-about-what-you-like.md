@@ -1,10 +1,12 @@
 ---
-title: Be courageous about what you like
+title: "be courageous about what you like"
 date: 2026-03-27
 ---
 
-The essay opens here. First paragraph sets the terms and says what the piece is about.
+Why is it that we often hide what truly brings pleasure? It's really easy to feel shame for liking what you like when it's more niche or uncommon. There's this unspoken disease that tells us that the "good" taste is the one which will earn approval from those around us, and project an image outwards that glorifies us and makes us cool. Almost like the only way to be seen is by curating this profile that appeals to trending content, being cool by consensus opinion.
 
-The middle works the idea over — an example, an objection, the part that changes your mind.
+But the reality is, we like what twists and turns our own individual and distinct chemistry, that's what makes you unique. Yet I get this visceral qualm when I'm in a position to share something that truly matters to me. Playing a new song to your friends in the car, wearing the new clothes you just bought, or introducing someone to your favorite cafe. It's easy to hesitate when you go into this unknown, where you're introducing something new to someone who's opinion matters, or even someone who's opinion doesn't. There's always this quiet hope in the air that they get it. That hope is natural, but it becomes dangerous when it subliminally shapes your choices.
 
-The close lands it without summarizing.
+Our tastes are built via feelings, emotions, and connections to life. We build our roots through what we are missing, what we are needing, and what we are enjoying. But then, without noticing, we sponge up everything around us, and edit our taste outwards. Taste becomes superficial because you choose for others, not yourself. It creates cognitive dissonance between what you need and what you have, and that makes us uncomfortable in our own skin. Think of the stereotypical trope of the kid putting on an outfit that doesn't fit their persona, all because they want to appeal to a certain audience. The most secure people you will ever meet are those who know exactly what they want and why, not because they're contrarian, but because they've broken the loop of approval-seeking. This is the whole idea of trends, they aren't inherently dishonest, we like some things because they actually might appeal to us, but a whole lot of people adopt that thing because adoption itself becomes the point. The reason seems clear enough, belonging to the group of adopters categorizes you in society, and you feel safe.
+
+However, it takes unbelievable courage to stick by your taste and share what moves you without any needing to brace for criticism. Let your preferences be evidence of your existence. Don't let the inevitable outsourcing of taste and this fugazi style shape how you approach life. You get to choose and craft what's beautiful around you. Anything created by nature and God has its own indelible objective mark, but anything created by mankind has subjective beauty for you to receive or reject.

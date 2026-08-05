@@ -135,6 +135,25 @@ a:hover {
   color: #555;
 }
 
+/* Video entries lead with a thumbnail; the date/title below match Writing. */
+.video-entry {
+  gap: 12px;
+}
+
+.video-thumb {
+  display: block;
+  max-width: 440px;
+  margin-bottom: 4px;
+  border-bottom: 0;
+}
+
+.video-thumb img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #f6f6f4;
+}
+
 /* --- Notes index --- */
 
 .note-groups {
@@ -338,23 +357,77 @@ a:hover {
 .post-body {
   font-size: 19px;
   line-height: 1.7;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
   margin-top: 12px;
 }
 
 .note-body {
   font-size: 19px;
   line-height: 1.6;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
 }
 
-.post-body p,
+.post-body > *:first-child,
+.note-body > *:first-child {
+  margin-top: 0;
+}
+
+.post-body > *:last-child,
+.note-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.post-body p {
+  margin: 0 0 18px;
+}
+
 .note-body p {
-  margin: 0;
+  margin: 0 0 16px;
+}
+
+/* Markdown structure inside a post body. Headings stay close to body size —
+   these are section markers in an essay, not page titles. */
+.post-body h2,
+.post-body h3,
+.post-body h4,
+.post-body h5,
+.post-body h6 {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  margin: 34px 0 14px;
+}
+
+.post-body h5,
+.post-body h6 {
+  font-weight: 400;
+  color: #555;
+}
+
+.post-body ul,
+.post-body ol {
+  margin: 0 0 18px;
+  padding-left: 22px;
+}
+
+.post-body li {
+  margin-bottom: 6px;
+}
+
+.post-body li:last-child {
+  margin-bottom: 0;
+}
+
+.post-body hr {
+  border: 0;
+  border-top: 1px solid #ddd;
+  margin: 32px 0;
+}
+
+.post-body blockquote {
+  margin: 0 0 18px;
+  padding-left: 18px;
+  border-left: 1px solid #ddd;
+  color: #555;
 }
 
 /* --- Responsive --- */

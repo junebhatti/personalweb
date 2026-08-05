@@ -1,10 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
+import { formatDate } from '../lib/dates';
 
-// Placeholder entries — swap in real videos.
+// Add a video by dropping in its YouTube id; the thumbnail follows from it.
 const videos = [
-  { date: 'August 2026', title: 'First video title', href: '#' },
-  { date: 'July 2026', title: 'Second video title', href: '#' },
+  {
+    id: 'mv1c93CzcGI',
+    title: 'choosing peace and abusing black coffee',
+    date: new Date('2026-07-08'),
+  },
 ];
 ---
 
@@ -19,9 +23,28 @@ const videos = [
 
       <div class="entries">
         {videos.map((video) => (
-          <div class="entry">
-            <div class="entry-date">{video.date}</div>
-            <a href={video.href} class="entry-title">{video.title}</a>
+          <div class="entry video-entry">
+            <a
+              href={`https://www.youtube.com/watch?v=${video.id}`}
+              target="_blank"
+              rel="noopener"
+              class="video-thumb"
+            >
+              <img
+                src={`https://i.ytimg.com/vi/${video.id}/maxresdefault.jpg`}
+                alt={`Thumbnail for ${video.title}`}
+                width="1280"
+                height="720"
+                loading="lazy"
+              />
+            </a>
+            <div class="entry-date">{formatDate(video.date)}</div>
+            <a
+              href={`https://www.youtube.com/watch?v=${video.id}`}
+              target="_blank"
+              rel="noopener"
+              class="entry-title"
+            >{video.title}</a>
           </div>
         ))}
       </div>
