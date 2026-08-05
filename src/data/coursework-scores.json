@@ -1,0 +1,119 @@
+{
+  "discrete-math": {
+    "applicability": 0.9,
+    "interesting": 0.95,
+    "teaching": 0.7,
+    "rigor": 0.85,
+    "enjoyment": 0.95,
+    "durability": 0.9,
+    "surprise": 0.85
+  },
+  "multivariable-calculus": {
+    "applicability": 0.85,
+    "interesting": 0.5,
+    "teaching": 0.5,
+    "rigor": 0.35,
+    "enjoyment": 0.45,
+    "durability": 0.6,
+    "surprise": 0.25
+  },
+  "linear-algebra": {
+    "applicability": 0.9,
+    "interesting": 0.9,
+    "teaching": 0.65,
+    "rigor": 0.8,
+    "enjoyment": 0.85,
+    "durability": 0.85,
+    "surprise": 0.8
+  },
+  "calculus-ii": {
+    "applicability": 0.8,
+    "interesting": 0.6,
+    "teaching": 0.55,
+    "rigor": 0.55,
+    "enjoyment": 0.7,
+    "durability": 0.6,
+    "surprise": 0.4
+  },
+  "great-american-novels": {
+    "applicability": 0.7,
+    "interesting": 1,
+    "teaching": 1,
+    "rigor": 0.85,
+    "enjoyment": 1,
+    "durability": 1,
+    "surprise": 0.9
+  },
+  "urdu": {
+    "applicability": 0.5,
+    "interesting": 0.85,
+    "teaching": 0.6,
+    "rigor": 0.5,
+    "enjoyment": 0.9,
+    "durability": 0.8,
+    "surprise": 0.45
+  },
+  "intro-study-of-literature": {
+    "applicability": 0.3,
+    "interesting": 0.45,
+    "teaching": 0.3,
+    "rigor": 0.2,
+    "enjoyment": 0.3,
+    "durability": 0.25,
+    "surprise": 0.2
+  },
+  "accounting": {
+    "applicability": 0.8,
+    "interesting": 0.35,
+    "teaching": 0.45,
+    "rigor": 0.35,
+    "enjoyment": 0.25,
+    "durability": 0.6,
+    "surprise": 0.2
+  },
+  "corporate-finance": {
+    "applicability": 0.85,
+    "interesting": 0.55,
+    "teaching": 0.85,
+    "rigor": 0.5,
+    "enjoyment": 0.6,
+    "durability": 0.65,
+    "surprise": 0.25
+  },
+  "microeconomics": {
+    "applicability": 0.45,
+    "interesting": 0.4,
+    "teaching": 0.4,
+    "rigor": 0.35,
+    "enjoyment": 0.25,
+    "durability": 0.3,
+    "surprise": 0.2
+  },
+  "macroeconomics": {
+    "applicability": 0.6,
+    "interesting": 0.45,
+    "teaching": 0.4,
+    "rigor": 0.2,
+    "enjoyment": 0.4,
+    "durability": 0.45,
+    "surprise": 0.3
+  },
+  "injustice-and-justice": {
+    "applicability": 0.35,
+    "interesting": 0.5,
+    "teaching": 0.35,
+    "rigor": 0.3,
+    "enjoyment": 0.35,
+    "durability": 0.3,
+    "surprise": 0.3
+  },
+  "us-political-system": {
+    "applicability": 0.25,
+    "interesting": 0.3,
+    "teaching": 0.25,
+    "rigor": 0.2,
+    "enjoyment": 0.2,
+    "durability": 0.25,
+    "surprise": 0.15
+  }
+}

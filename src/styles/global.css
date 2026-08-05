@@ -344,6 +344,69 @@ a:hover {
   font-variant-numeric: tabular-nums;
 }
 
+.legend {
+  font-size: 15px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 16px;
+}
+
+.legend summary {
+  color: #45539b;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.legend summary:hover {
+  color: #1a1aff;
+}
+
+.legend-body {
+  max-width: 640px;
+  padding-top: 14px;
+}
+
+.legend-intro {
+  margin: 0 0 16px;
+  line-height: 1.55;
+  color: #555;
+}
+
+.legend-list {
+  margin: 0;
+}
+
+.legend-item {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 16px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.legend-item dt {
+  color: #111;
+}
+
+.legend-item dd {
+  margin: 0;
+  color: #555;
+}
+
+.legend-anchors {
+  margin: 16px 0 0;
+  color: #888;
+  line-height: 1.5;
+}
+
+.legend-anchor {
+  color: #111;
+  font-variant-numeric: tabular-nums;
+}
+
+.legend-sep {
+  color: #ccc;
+}
+
 .ranker {
   display: flex;
   flex-direction: column;
@@ -554,6 +617,17 @@ input[type='range'] {
   .note-group {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+
+  .legend-item {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    margin-bottom: 14px;
+  }
+
+  .ranker-row {
+    grid-template-columns: 92px 1fr 38px;
+    gap: 8px;
   }
 }
 

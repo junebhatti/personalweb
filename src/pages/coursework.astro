@@ -1,23 +1,25 @@
 ---
 import Base from '../layouts/Base.astro';
-import { courses, DIMENSIONS, SCORE_MAX, total, formatTotal } from '../data/coursework';
+import {
+  courses,
+  DIMENSIONS,
+  SCALE_ANCHORS,
+  SCORE_MAX,
+  total,
+  formatTotal,
+} from '../data/coursework';
+
+type Course = (typeof courses)[number];
 
 // Rendered in section order; the client re-sorts and filters from the same markup.
 const GROUPS = [
-  { key: 'important', label: 'Important', match: (c: typeof courses[number]) => c.important },
-  {
-    key: 'loved',
-    label: 'Loved',
-    match: (c: typeof courses[number]) => c.loved && !c.important,
-  },
-  {
-    key: 'other',
-    label: 'Other',
-    match: (c: typeof courses[number]) => !c.important && !c.loved,
-  },
+  { key: 'important', label: 'Important', match: (c: Course) => c.important },
+  { key: 'loved', label: 'Loved', match: (c: Course) => c.loved && !c.important },
+  { key: 'other', label: 'Other', match: (c: Course) => !c.important && !c.loved },
 ];
 
 const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
+const dimensionConfig = DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight }));
 ---
 
 <Base title="Coursework — Junaid Bhatti">
@@ -51,11 +53,42 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
 
         <div class="control-row">
           <button type="button" class="chip chip-action" data-rank-toggle>Rank them</button>
-          <button type="button" class="chip" data-copy hidden>Copy scores</button>
+          <button type="button" class="chip" data-save hidden>Save</button>
+          <button type="button" class="chip" data-copy hidden>Copy JSON</button>
           <button type="button" class="chip" data-reset hidden>Reset</button>
           <span class="control-note" data-status role="status" aria-live="polite"></span>
         </div>
       </div>
+
+      <details class="legend">
+        <summary>How the score works</summary>
+        <div class="legend-body">
+          <p class="legend-intro">
+            Every course is scored 0 to 1 on each of the {DIMENSIONS.length} dimensions below.
+            The number in front of a course is their average, stretched onto a 0–{SCORE_MAX}
+            scale — so it means the same thing even if a dimension is added or dropped.
+            All of them point the same way: higher is better.
+          </p>
+
+          <dl class="legend-list">
+            {DIMENSIONS.map((d) => (
+              <div class="legend-item">
+                <dt>{d.label}</dt>
+                <dd>{d.definition}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <p class="legend-anchors">
+            {SCALE_ANCHORS.map((a, i) => (
+              <>
+                {i > 0 && <span class="legend-sep"> · </span>}
+                <span class="legend-anchor">{a.value}</span> {a.meaning}
+              </>
+            ))}
+          </p>
+        </div>
+      </details>
 
       {GROUPS.map((group) => {
         const inGroup = courses.filter(group.match);
@@ -78,7 +111,7 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
                   <div class="ranker" data-ranker hidden>
                     {DIMENSIONS.map((d) => (
                       <label class="ranker-row">
-                        <span class="ranker-label">{d.label}</span>
+                        <span class="ranker-label" title={d.definition}>{d.label}</span>
                         <input
                           type="range"
                           min="0"
@@ -86,6 +119,7 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
                           step="0.05"
                           value={course.scores[d.key]}
                           data-dim={d.key}
+                          aria-label={`${d.label} — ${d.definition}`}
                         />
                         <span class="ranker-value" data-dim-value={d.key}>
                           {course.scores[d.key].toFixed(2)}
@@ -104,8 +138,13 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
     </div>
   </div>
 
-  <script is:inline define:vars={{ defaults, DIMENSIONS: DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })), SCORE_MAX }}>
-    const KEY = 'coursework-scores-v1';
+  <script
+    is:inline
+    define:vars={{ defaults, DIMENSIONS: dimensionConfig, SCORE_MAX }}
+  >
+    const KEY = 'coursework-scores-v2';
+    const ENDPOINT = '/api/coursework-scores';
+
     const controls = document.querySelector('[data-controls]');
     const cards = Array.from(document.querySelectorAll('[data-course]'));
     const groups = Array.from(document.querySelectorAll('[data-group]'));
@@ -120,6 +159,7 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
       sort: 'section',
       min: 0,
       ranking: false,
+      dirty: false,
       scores: load(),
     };
 
@@ -134,7 +174,7 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
       return base;
     }
 
-    function save() {
+    function stash() {
       try {
         localStorage.setItem(KEY, JSON.stringify(state.scores));
       } catch {}
@@ -148,6 +188,33 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
 
     function status(text) {
       if (statusEl) statusEl.textContent = text;
+    }
+
+    /**
+     * Writes to the JSON file when the dev server is up. On the deployed site
+     * there is nothing listening, so the change stays in this browser and the
+     * copy button is how it reaches the repo.
+     */
+    async function saveToFile() {
+      status('Saving…');
+      try {
+        const response = await fetch(ENDPOINT, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(state.scores),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error(result.error || 'save failed');
+        state.dirty = false;
+        // The file is the source of truth now, so drop the local draft rather
+        // than let it shadow a value edited anywhere else.
+        try {
+          localStorage.removeItem(KEY);
+        } catch {}
+        status('Saved to coursework-scores.json — commit it to publish.');
+      } catch {
+        status('No dev server, so this is saved in your browser only. Use Copy JSON.');
+      }
     }
 
     function render() {
@@ -164,10 +231,9 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
         if (card.dataset.loved === 'true') tags.push('loved');
         if (!tags.length) tags.push('other');
 
-        const passesFilter =
-          state.filters.size === 0 || tags.some((t) => state.filters.has(t));
-        const passesScore = value >= state.min - 1e-9;
-        const show = passesFilter && passesScore;
+        const show =
+          (state.filters.size === 0 || tags.some((t) => state.filters.has(t))) &&
+          value >= state.min - 1e-9;
 
         card.hidden = !show;
         if (show) visible++;
@@ -177,25 +243,15 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
       }
 
       // In score order everything sits in one list, so the section heads go away.
-      const flat = state.sort === 'score';
-      for (const group of groups) {
-        const items = Array.from(group.querySelectorAll('[data-course]'));
-        const anyVisible = items.some((el) => !el.hidden);
-        group.hidden = !anyVisible;
-        const head = group.querySelector('[data-group-head]');
-        if (head) head.hidden = flat;
-      }
-
-      if (flat) {
-        const container = groups[0] && groups[0].querySelector('.list-items');
-        if (container) {
-          const ordered = cards
-            .slice()
-            .sort((a, b) => Number(b.dataset.total) - Number(a.dataset.total));
-          for (const card of ordered) container.appendChild(card);
-          groups[0].hidden = ordered.every((el) => el.hidden);
-          for (const group of groups.slice(1)) group.hidden = true;
-        }
+      if (state.sort === 'score') {
+        const container = groups[0].querySelector('.list-items');
+        const ordered = cards
+          .slice()
+          .sort((a, b) => Number(b.dataset.total) - Number(a.dataset.total));
+        for (const card of ordered) container.appendChild(card);
+        groups[0].hidden = ordered.every((el) => el.hidden);
+        groups[0].querySelector('[data-group-head]').hidden = true;
+        for (const group of groups.slice(1)) group.hidden = true;
       } else {
         for (const card of cards) {
           const home = document.querySelector(
@@ -206,8 +262,7 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
         for (const group of groups) {
           const items = Array.from(group.querySelectorAll('[data-course]'));
           group.hidden = items.length === 0 || items.every((el) => el.hidden);
-          const head = group.querySelector('[data-group-head]');
-          if (head) head.hidden = false;
+          group.querySelector('[data-group-head]').hidden = false;
         }
       }
 
@@ -246,16 +301,19 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
         state.ranking = !state.ranking;
         button.classList.toggle('is-on', state.ranking);
         button.textContent = state.ranking ? 'Done ranking' : 'Rank them';
-        controls.querySelector('[data-copy]').hidden = !state.ranking;
-        controls.querySelector('[data-reset]').hidden = !state.ranking;
-        status(state.ranking ? 'Changes save in this browser.' : '');
+        for (const attr of ['data-save', 'data-copy', 'data-reset']) {
+          controls.querySelector('[' + attr + ']').hidden = !state.ranking;
+        }
+        status(state.ranking ? 'Drag a slider, then Save.' : '');
         render();
       }
+
+      if (button.hasAttribute('data-save')) saveToFile();
 
       if (button.hasAttribute('data-copy')) {
         const text = JSON.stringify(state.scores, null, 2);
         navigator.clipboard.writeText(text).then(
-          () => status('Copied — paste into src/data/coursework.ts'),
+          () => status('Copied — paste into src/data/coursework-scores.json'),
           () => status('Copy failed')
         );
       }
@@ -270,21 +328,22 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
           card.querySelectorAll('[data-dim]').forEach((input) => {
             const dim = input.dataset.dim;
             input.value = state.scores[id][dim];
-            card.querySelector('[data-dim-value="' + dim + '"]').textContent =
-              Number(state.scores[id][dim]).toFixed(2);
+            card.querySelector('[data-dim-value="' + dim + '"]').textContent = Number(
+              state.scores[id][dim]
+            ).toFixed(2);
           });
         }
-        status('Reset to the starting scores.');
+        state.dirty = false;
+        status('Back to the saved scores.');
         render();
       }
     });
 
     controls.addEventListener('input', (event) => {
-      if (event.target === minInput) {
-        state.min = Number(minInput.value);
-        minValueEl.textContent = state.min.toFixed(1);
-        render();
-      }
+      if (event.target !== minInput) return;
+      state.min = Number(minInput.value);
+      minValueEl.textContent = state.min.toFixed(1);
+      render();
     });
 
     document.addEventListener('input', (event) => {
@@ -292,14 +351,21 @@ const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
       if (!input.dataset || !input.dataset.dim) return;
       const card = input.closest('[data-course]');
       if (!card) return;
-      const id = card.dataset.course;
       const dim = input.dataset.dim;
-      state.scores[id][dim] = Number(input.value);
+      state.scores[card.dataset.course][dim] = Number(input.value);
       card.querySelector('[data-dim-value="' + dim + '"]').textContent = Number(
         input.value
       ).toFixed(2);
-      save();
+      state.dirty = true;
+      stash();
+      status('Unsaved changes.');
       render();
+    });
+
+    window.addEventListener('beforeunload', (event) => {
+      if (!state.dirty) return;
+      event.preventDefault();
+      event.returnValue = '';
     });
 
     render();
