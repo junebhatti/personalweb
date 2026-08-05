@@ -1,0 +1,98 @@
+---
+import Base from '../layouts/Base.astro';
+
+// Author's verbatim commentary — do not rewrite.
+const important = [
+  {
+    name: 'Discrete Math',
+    comment:
+      "What a lovely introduction to real math. First time I've really had to be logical with math, no plugging and chugging.",
+  },
+  {
+    name: 'Multivariable Calculus',
+    comment: 'Grew to appreciate it over the semester, but very difficult and formulaic',
+  },
+  {
+    name: 'Linear Algebra',
+    comment: "first time I've had to use my imagination in a math course...",
+  },
+  {
+    name: 'Calculus II',
+    comment: 'series tests are sneaky fun...',
+  },
+  {
+    name: 'Great American Novels',
+    comment:
+      "greatest class I've ever taken, the most I've learned anywhere, with the smartest prof I've ever had. I yearn for another class this good.",
+  },
+  {
+    name: 'Urdu',
+    comment: 'so excited to be learning my cultural language',
+  },
+];
+
+const more = [
+  {
+    name: 'Intro to the Study of Literature',
+    comment:
+      'Had to take this as a prereq, read some interesting stuff, but very simple class, not too engaging of discussions',
+  },
+  {
+    name: 'Accounting',
+    comment:
+      'helpful for developing a financial framework that helped with recruiting... but kind of boring...',
+  },
+  {
+    name: 'Corporate Finance',
+    comment:
+      'great professor, basically got reps with the work that I prepped for during recruiting',
+  },
+  {
+    name: 'Microeconomics',
+    comment: 'I can see the appeal, but not for me.',
+  },
+  {
+    name: 'Macroeconomics',
+    comment:
+      'Felt more applicable to everyday life, necessary class, but intro was really simple',
+  },
+  {
+    name: 'Injustice and Justice',
+    comment: 'read some cool stuff, but not too stimulating',
+  },
+  {
+    name: 'The U.S. Political System',
+    comment: 'I learned what gerrymandering is...',
+  },
+];
+---
+
+<Base title="Coursework — Junaid Bhatti">
+  <div class="page">
+    <div class="back-row">
+      <a href="/other" class="back-link">&larr; back</a>
+    </div>
+
+    <div class="list-content">
+      <div class="section-label">Coursework</div>
+
+      <div class="list-section">
+        <div class="subhead">Important / Loved</div>
+        <div class="list-items">
+          {important.map((course) => (
+            <div><span class="item-name">{course.name}</span> — {course.comment}</div>
+          ))}
+        </div>
+      </div>
+
+      <div class="list-section">
+        <div class="subhead">More</div>
+        <div class="list-items">
+          {more.map((course) => (
+            <div><span class="item-name">{course.name}</span> — {course.comment}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</Base>

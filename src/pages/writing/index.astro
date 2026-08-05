@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { formatDate } from '../../lib/dates';
+
+const posts = (await getCollection('writing')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<Base title="Writing — Junaid Bhatti">
+  <div class="page">
+    <div class="back-row">
+      <a href="/" class="back-link">&larr; back</a>
+    </div>
+
+    <div class="content">
+      <div class="section-label">Long form <span class="aside">(No LLMs, some noise)</span></div>
+
+      <div class="entries">
+        {posts.map((post) => (
+          <div class="entry">
+            <div class="entry-date">{formatDate(post.data.date)}</div>
+            <a href={`/writing/${post.id}`} class="entry-title">{post.data.title}</a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</Base>

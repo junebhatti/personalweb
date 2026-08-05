@@ -1,0 +1,41 @@
+---
+import Base from '../layouts/Base.astro';
+
+// Placeholder entries — swap in real projects.
+const projects = [
+  {
+    year: '2026',
+    title: 'First project',
+    href: '#',
+    description: 'One line on what it is and why it exists.',
+  },
+  {
+    year: '2025',
+    title: 'Second project',
+    href: '#',
+    description: 'One line on what it is and why it exists.',
+  },
+];
+---
+
+<Base title="Projects — Junaid Bhatti">
+  <div class="page">
+    <div class="back-row">
+      <a href="/" class="back-link">&larr; back</a>
+    </div>
+
+    <div class="content">
+      <div class="section-label">Things I've built</div>
+
+      <div class="entries">
+        {projects.map((project) => (
+          <div class="entry">
+            <div class="entry-date">{project.year}</div>
+            <a href={project.href} class="entry-title">{project.title}</a>
+            <div class="entry-desc">{project.description}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</Base>

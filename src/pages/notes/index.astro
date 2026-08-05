@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { formatDate } from '../../lib/dates';
+
+const notes = (await getCollection('notes')).sort(
+  (a, b) =>
+    b.data.date.valueOf() - a.data.date.valueOf() || a.id.localeCompare(b.id)
+);
+
+// Group by date, newest first. A note's index paragraphs come from its raw body.
+const groups: { date: Date; notes: { id: string; paragraphs: string[] }[] }[] = [];
+for (const note of notes) {
+  const key = note.data.date.valueOf();
+  const paragraphs = (note.body ?? '')
+    .trim()
+    .split(/\n\s*\n/)
+    .filter(Boolean);
+  const group = groups.find((g) => g.date.valueOf() === key);
+  if (group) {
+    group.notes.push({ id: note.id, paragraphs });
+  } else {
+    groups.push({ date: note.data.date, notes: [{ id: note.id, paragraphs }] });
+  }
+}
+---
+
+<Base title="Notes — Junaid Bhatti">
+  <div class="page">
+    <div class="back-row">
+      <a href="/" class="back-link">&larr; back</a>
+    </div>
+
+    <div class="content">
+      <div class="section-label">Short form — thoughts, ideas, observations</div>
+
+      <div class="note-groups">
+        {groups.map((group) => (
+          <div class="note-group">
+            <div class="note-group-date">{formatDate(group.date)}</div>
+            <div class="note-list">
+              {group.notes.map((note) => (
+                <a href={`/notes/${note.id}`} class="note-card">
+                  {note.paragraphs.map((p) => (
+                    <div>{p}</div>
+                  ))}
+                </a>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</Base>

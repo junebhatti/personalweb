@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+
+// Placeholder entries — swap in real videos.
+const videos = [
+  { date: 'August 2026', title: 'First video title', href: '#' },
+  { date: 'July 2026', title: 'Second video title', href: '#' },
+];
+---
+
+<Base title="Videos — Junaid Bhatti">
+  <div class="page">
+    <div class="back-row">
+      <a href="/" class="back-link">&larr; back</a>
+    </div>
+
+    <div class="content">
+      <div class="section-label">YouTube</div>
+
+      <div class="entries">
+        {videos.map((video) => (
+          <div class="entry">
+            <div class="entry-date">{video.date}</div>
+            <a href={video.href} class="entry-title">{video.title}</a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</Base>
