@@ -1,70 +1,23 @@
 ---
 import Base from '../layouts/Base.astro';
+import { courses, DIMENSIONS, SCORE_MAX, total, formatTotal } from '../data/coursework';
 
-// Author's verbatim commentary — do not rewrite.
-const important = [
+// Rendered in section order; the client re-sorts and filters from the same markup.
+const GROUPS = [
+  { key: 'important', label: 'Important', match: (c: typeof courses[number]) => c.important },
   {
-    name: 'Discrete Math',
-    comment:
-      "What a lovely introduction to real math. First time I've really had to be logical with math, no plugging and chugging.",
+    key: 'loved',
+    label: 'Loved',
+    match: (c: typeof courses[number]) => c.loved && !c.important,
   },
   {
-    name: 'Multivariable Calculus',
-    comment: 'Grew to appreciate it over the semester, but very difficult and formulaic',
-  },
-  {
-    name: 'Linear Algebra',
-    comment: "first time I've had to use my imagination in a math course...",
-  },
-  {
-    name: 'Calculus II',
-    comment: 'series tests are sneaky fun...',
-  },
-  {
-    name: 'Great American Novels',
-    comment:
-      "greatest class I've ever taken, the most I've learned anywhere, with the smartest prof I've ever had. I yearn for another class this good.",
-  },
-  {
-    name: 'Urdu',
-    comment: 'so excited to be learning my cultural language',
+    key: 'other',
+    label: 'Other',
+    match: (c: typeof courses[number]) => !c.important && !c.loved,
   },
 ];
 
-const more = [
-  {
-    name: 'Intro to the Study of Literature',
-    comment:
-      'Had to take this as a prereq, read some interesting stuff, but very simple class, not too engaging of discussions',
-  },
-  {
-    name: 'Accounting',
-    comment:
-      'helpful for developing a financial framework that helped with recruiting... but kind of boring...',
-  },
-  {
-    name: 'Corporate Finance',
-    comment:
-      'great professor, basically got reps with the work that I prepped for during recruiting',
-  },
-  {
-    name: 'Microeconomics',
-    comment: 'I can see the appeal, but not for me.',
-  },
-  {
-    name: 'Macroeconomics',
-    comment:
-      'Felt more applicable to everyday life, necessary class, but intro was really simple',
-  },
-  {
-    name: 'Injustice and Justice',
-    comment: 'read some cool stuff, but not too stimulating',
-  },
-  {
-    name: 'The U.S. Political System',
-    comment: 'I learned what gerrymandering is...',
-  },
-];
+const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
 ---
 
 <Base title="Coursework — Junaid Bhatti">
@@ -76,23 +29,279 @@ const more = [
     <div class="list-content">
       <div class="section-label">Coursework</div>
 
-      <div class="list-section">
-        <div class="subhead">Important / Loved</div>
-        <div class="list-items">
-          {important.map((course) => (
-            <div><span class="item-name">{course.name}</span> — {course.comment}</div>
-          ))}
+      <div class="controls" data-controls hidden>
+        <div class="control-row">
+          <span class="control-label">Show</span>
+          <button type="button" class="chip" data-filter="important">Important</button>
+          <button type="button" class="chip" data-filter="loved">Loved</button>
+          <button type="button" class="chip" data-filter="other">Other</button>
+        </div>
+
+        <div class="control-row">
+          <span class="control-label">Sort</span>
+          <button type="button" class="chip is-on" data-sort="section">By section</button>
+          <button type="button" class="chip" data-sort="score">By score</button>
+        </div>
+
+        <div class="control-row">
+          <label class="control-label" for="min-score">Min score</label>
+          <input type="range" id="min-score" min="0" max={SCORE_MAX} step="0.1" value="0" />
+          <span class="control-value" data-min-score-value>0.0</span>
+        </div>
+
+        <div class="control-row">
+          <button type="button" class="chip chip-action" data-rank-toggle>Rank them</button>
+          <button type="button" class="chip" data-copy hidden>Copy scores</button>
+          <button type="button" class="chip" data-reset hidden>Reset</button>
+          <span class="control-note" data-status role="status" aria-live="polite"></span>
         </div>
       </div>
 
-      <div class="list-section">
-        <div class="subhead">More</div>
-        <div class="list-items">
-          {more.map((course) => (
-            <div><span class="item-name">{course.name}</span> — {course.comment}</div>
-          ))}
-        </div>
-      </div>
+      {GROUPS.map((group) => {
+        const inGroup = courses.filter(group.match);
+        return (
+          <div class="list-section" data-group={group.key} hidden={inGroup.length === 0}>
+            <div class="subhead" data-group-head>{group.label}</div>
+            <div class="list-items">
+              {inGroup.map((course) => (
+                <div
+                  class="course"
+                  data-course={course.id}
+                  data-important={String(course.important)}
+                  data-loved={String(course.loved)}
+                  data-total={total(course.scores).toFixed(4)}
+                >
+                  <div class="course-line">
+                    <span class="course-score" data-score>({formatTotal(total(course.scores))})</span>{' '}
+                    <span class="item-name">{course.name}</span> — {course.comment}
+                  </div>
+                  <div class="ranker" data-ranker hidden>
+                    {DIMENSIONS.map((d) => (
+                      <label class="ranker-row">
+                        <span class="ranker-label">{d.label}</span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={course.scores[d.key]}
+                          data-dim={d.key}
+                        />
+                        <span class="ranker-value" data-dim-value={d.key}>
+                          {course.scores[d.key].toFixed(2)}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+
+      <div class="empty-note" data-empty hidden>Nothing matches those filters.</div>
     </div>
   </div>
+
+  <script is:inline define:vars={{ defaults, DIMENSIONS: DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })), SCORE_MAX }}>
+    const KEY = 'coursework-scores-v1';
+    const controls = document.querySelector('[data-controls]');
+    const cards = Array.from(document.querySelectorAll('[data-course]'));
+    const groups = Array.from(document.querySelectorAll('[data-group]'));
+    const statusEl = document.querySelector('[data-status]');
+    const emptyEl = document.querySelector('[data-empty]');
+    const minInput = document.getElementById('min-score');
+    const minValueEl = document.querySelector('[data-min-score-value]');
+
+    const maxWeight = DIMENSIONS.reduce((s, d) => s + d.weight, 0);
+    const state = {
+      filters: new Set(),
+      sort: 'section',
+      min: 0,
+      ranking: false,
+      scores: load(),
+    };
+
+    function load() {
+      const base = JSON.parse(JSON.stringify(defaults));
+      try {
+        const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+        for (const id of Object.keys(base)) {
+          if (saved[id]) Object.assign(base[id], saved[id]);
+        }
+      } catch {}
+      return base;
+    }
+
+    function save() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(state.scores));
+      } catch {}
+    }
+
+    function totalFor(id) {
+      const s = state.scores[id] || {};
+      const weighted = DIMENSIONS.reduce((sum, d) => sum + (s[d.key] || 0) * d.weight, 0);
+      return maxWeight ? (weighted / maxWeight) * SCORE_MAX : 0;
+    }
+
+    function status(text) {
+      if (statusEl) statusEl.textContent = text;
+    }
+
+    function render() {
+      let visible = 0;
+
+      for (const card of cards) {
+        const id = card.dataset.course;
+        const value = totalFor(id);
+        card.dataset.total = value.toFixed(4);
+        card.querySelector('[data-score]').textContent = '(' + value.toFixed(1) + ')';
+
+        const tags = [];
+        if (card.dataset.important === 'true') tags.push('important');
+        if (card.dataset.loved === 'true') tags.push('loved');
+        if (!tags.length) tags.push('other');
+
+        const passesFilter =
+          state.filters.size === 0 || tags.some((t) => state.filters.has(t));
+        const passesScore = value >= state.min - 1e-9;
+        const show = passesFilter && passesScore;
+
+        card.hidden = !show;
+        if (show) visible++;
+
+        const ranker = card.querySelector('[data-ranker]');
+        if (ranker) ranker.hidden = !state.ranking;
+      }
+
+      // In score order everything sits in one list, so the section heads go away.
+      const flat = state.sort === 'score';
+      for (const group of groups) {
+        const items = Array.from(group.querySelectorAll('[data-course]'));
+        const anyVisible = items.some((el) => !el.hidden);
+        group.hidden = !anyVisible;
+        const head = group.querySelector('[data-group-head]');
+        if (head) head.hidden = flat;
+      }
+
+      if (flat) {
+        const container = groups[0] && groups[0].querySelector('.list-items');
+        if (container) {
+          const ordered = cards
+            .slice()
+            .sort((a, b) => Number(b.dataset.total) - Number(a.dataset.total));
+          for (const card of ordered) container.appendChild(card);
+          groups[0].hidden = ordered.every((el) => el.hidden);
+          for (const group of groups.slice(1)) group.hidden = true;
+        }
+      } else {
+        for (const card of cards) {
+          const home = document.querySelector(
+            '[data-group="' + card.dataset.home + '"] .list-items'
+          );
+          if (home) home.appendChild(card);
+        }
+        for (const group of groups) {
+          const items = Array.from(group.querySelectorAll('[data-course]'));
+          group.hidden = items.length === 0 || items.every((el) => el.hidden);
+          const head = group.querySelector('[data-group-head]');
+          if (head) head.hidden = false;
+        }
+      }
+
+      if (emptyEl) emptyEl.hidden = visible > 0;
+    }
+
+    // Remember each card's original section so "by section" can restore it.
+    for (const card of cards) {
+      const group = card.closest('[data-group]');
+      card.dataset.home = group ? group.dataset.group : 'other';
+    }
+
+    controls.hidden = false;
+
+    controls.addEventListener('click', (event) => {
+      const button = event.target.closest('button');
+      if (!button) return;
+
+      if (button.dataset.filter) {
+        const key = button.dataset.filter;
+        if (state.filters.has(key)) state.filters.delete(key);
+        else state.filters.add(key);
+        button.classList.toggle('is-on', state.filters.has(key));
+        render();
+      }
+
+      if (button.dataset.sort) {
+        state.sort = button.dataset.sort;
+        controls
+          .querySelectorAll('[data-sort]')
+          .forEach((el) => el.classList.toggle('is-on', el === button));
+        render();
+      }
+
+      if (button.hasAttribute('data-rank-toggle')) {
+        state.ranking = !state.ranking;
+        button.classList.toggle('is-on', state.ranking);
+        button.textContent = state.ranking ? 'Done ranking' : 'Rank them';
+        controls.querySelector('[data-copy]').hidden = !state.ranking;
+        controls.querySelector('[data-reset]').hidden = !state.ranking;
+        status(state.ranking ? 'Changes save in this browser.' : '');
+        render();
+      }
+
+      if (button.hasAttribute('data-copy')) {
+        const text = JSON.stringify(state.scores, null, 2);
+        navigator.clipboard.writeText(text).then(
+          () => status('Copied — paste into src/data/coursework.ts'),
+          () => status('Copy failed')
+        );
+      }
+
+      if (button.hasAttribute('data-reset')) {
+        state.scores = JSON.parse(JSON.stringify(defaults));
+        try {
+          localStorage.removeItem(KEY);
+        } catch {}
+        for (const card of cards) {
+          const id = card.dataset.course;
+          card.querySelectorAll('[data-dim]').forEach((input) => {
+            const dim = input.dataset.dim;
+            input.value = state.scores[id][dim];
+            card.querySelector('[data-dim-value="' + dim + '"]').textContent =
+              Number(state.scores[id][dim]).toFixed(2);
+          });
+        }
+        status('Reset to the starting scores.');
+        render();
+      }
+    });
+
+    controls.addEventListener('input', (event) => {
+      if (event.target === minInput) {
+        state.min = Number(minInput.value);
+        minValueEl.textContent = state.min.toFixed(1);
+        render();
+      }
+    });
+
+    document.addEventListener('input', (event) => {
+      const input = event.target;
+      if (!input.dataset || !input.dataset.dim) return;
+      const card = input.closest('[data-course]');
+      if (!card) return;
+      const id = card.dataset.course;
+      const dim = input.dataset.dim;
+      state.scores[id][dim] = Number(input.value);
+      card.querySelector('[data-dim-value="' + dim + '"]').textContent = Number(
+        input.value
+      ).toFixed(2);
+      save();
+      render();
+    });
+
+    render();
+  </script>
 </Base>

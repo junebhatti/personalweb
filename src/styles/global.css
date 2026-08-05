@@ -4,6 +4,12 @@
   box-sizing: border-box;
 }
 
+/* Several components below set an explicit display, which would otherwise beat
+   the user-agent rule for [hidden]. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   background: #fff;
@@ -267,6 +273,118 @@ a:hover {
 .stub {
   font-size: 17px;
   line-height: 1.55;
+  color: #888;
+}
+
+/* --- Coursework ranking --- */
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 0 4px;
+  border-top: 1px solid #111;
+  border-bottom: 1px solid #ddd;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 14px;
+}
+
+.control-label {
+  font-size: 14px;
+  color: #888;
+  min-width: 68px;
+}
+
+.control-value {
+  font-size: 14px;
+  color: #666;
+  font-variant-numeric: tabular-nums;
+}
+
+.control-note {
+  font-size: 14px;
+  color: #888;
+}
+
+.chip {
+  font: inherit;
+  font-size: 15px;
+  color: #45539b;
+  background: none;
+  border: 1px solid #ddd;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: color 120ms, border-color 120ms;
+}
+
+.chip:hover {
+  color: #1a1aff;
+  border-color: #bbb;
+}
+
+.chip.is-on {
+  color: #fff;
+  background: #45539b;
+  border-color: #45539b;
+}
+
+.chip-action {
+  border-color: #111;
+  color: #111;
+}
+
+.course-score {
+  color: #888;
+  font-variant-numeric: tabular-nums;
+}
+
+.ranker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0 4px;
+  padding: 14px 16px;
+  background: #f6f6f4;
+  max-width: 460px;
+}
+
+.ranker-row {
+  display: grid;
+  grid-template-columns: 108px 1fr 42px;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.ranker-label {
+  color: #666;
+}
+
+.ranker-value {
+  color: #111;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+input[type='range'] {
+  accent-color: #45539b;
+  width: 100%;
+  min-width: 120px;
+}
+
+.control-row input[type='range'] {
+  width: 200px;
+  flex: 0 0 auto;
+}
+
+.empty-note {
+  font-size: 17px;
   color: #888;
 }
 
