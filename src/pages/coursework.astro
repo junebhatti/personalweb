@@ -9,7 +9,7 @@ import {
   formatTotal,
   type Scores,
 } from '../data/coursework';
-import { getSupabase, isSupabaseConfigured, SCORES_TABLE } from '../lib/supabase';
+import { fetchScores, isSupabaseConfigured } from '../lib/supabase';
 
 type Course = ReturnType<typeof buildCourses>[number];
 
@@ -17,13 +17,12 @@ type Course = ReturnType<typeof buildCourses>[number];
 // any JavaScript runs. If the project is unreachable at build time we fall
 // back to the JSON seed rather than failing the build.
 let overrides: Record<string, Partial<Scores>> = {};
-const supabase = getSupabase();
-if (supabase) {
-  const { data, error } = await supabase.from(SCORES_TABLE).select('course_id, scores');
-  if (error) {
-    console.warn(`[coursework] using seed scores — Supabase read failed: ${error.message}`);
-  } else if (data) {
-    overrides = Object.fromEntries(data.map((row) => [row.course_id, row.scores ?? {}]));
+if (isSupabaseConfigured) {
+  const rows = await fetchScores();
+  if (rows) {
+    overrides = Object.fromEntries(rows.map((row) => [row.course_id, row.scores ?? {}]));
+  } else {
+    console.warn('[coursework] Supabase unreachable at build time — using seed scores');
   }
 }
 
@@ -72,7 +71,7 @@ const clientData = {
           <span class="control-value" data-min-score-value>0.0</span>
         </div>
 
-        <div class="control-row">
+        <div class="control-row" data-editor-row hidden>
           <button type="button" class="chip chip-action" data-rank-toggle>Rank them</button>
           <button type="button" class="chip" data-save hidden>Save</button>
           <button type="button" class="chip" data-copy hidden>Copy JSON</button>
@@ -179,7 +178,13 @@ const clientData = {
   <script type="application/json" id="coursework-data" set:html={JSON.stringify(clientData)} />
 
   <script>
-    import { getSupabase, SCORES_TABLE } from '../lib/supabase';
+    import {
+      fetchScores,
+      hasStoredSession,
+      isSupabaseConfigured,
+      loadClient,
+      SCORES_TABLE,
+    } from '../lib/supabase';
 
     const config = JSON.parse(document.getElementById('coursework-data')!.textContent!);
     const { defaults, dimensions, scoreMax, supabaseEnabled } = config;
@@ -196,8 +201,9 @@ const clientData = {
     const minValueEl = document.querySelector('[data-min-score-value]') as HTMLElement;
     const signinForm = document.querySelector('[data-signin]') as HTMLFormElement;
     const signoutBtn = document.querySelector('[data-signout]') as HTMLElement;
+    const editorRow = document.querySelector('[data-editor-row]') as HTMLElement;
 
-    const supabase = supabaseEnabled ? getSupabase() : null;
+    const useSupabase = supabaseEnabled && isSupabaseConfigured;
     const maxWeight = dimensions.reduce((s: number, d: any) => s + d.weight, 0);
 
     const state = {
@@ -246,6 +252,21 @@ const clientData = {
       if (statusEl) statusEl.textContent = text;
     }
 
+    /**
+     * Visitors get a clean page: filters and sorting, no editing UI and no
+     * sign-in prompt. The editor appears only once you are signed in — or
+     * always when there is no Supabase project, since then it is the local
+     * authoring tool. Add ?edit to the URL to reveal the sign-in form.
+     */
+    function applyEditorVisibility() {
+      const canEdit = !useSupabase || state.signedIn;
+      editorRow.hidden = !canEdit;
+      if (!canEdit && state.ranking) {
+        state.ranking = false;
+        render();
+      }
+    }
+
     function syncSliders() {
       for (const card of cards) {
         const id = card.dataset.course!;
@@ -260,9 +281,9 @@ const clientData = {
 
     /** Pull the current values so a stale build never shows stale numbers. */
     async function refreshFromSupabase() {
-      if (!supabase) return;
-      const { data, error } = await supabase.from(SCORES_TABLE).select('course_id, scores');
-      if (error || !data) return;
+      if (!useSupabase) return;
+      const data = await fetchScores();
+      if (!data) return;
       let changed = false;
       for (const row of data) {
         const local = state.scores[row.course_id];
@@ -281,7 +302,7 @@ const clientData = {
     }
 
     async function save() {
-      if (supabase) {
+      if (useSupabase) {
         if (!state.signedIn) {
           signinForm.hidden = false;
           status('Sign in to save.');
@@ -292,9 +313,10 @@ const clientData = {
           course_id,
           scores,
         }));
-        const { error } = await supabase.from(SCORES_TABLE).upsert(rows, {
-          onConflict: 'course_id',
-        });
+        const client = await loadClient();
+        const { error } = await client
+          .from(SCORES_TABLE)
+          .upsert(rows, { onConflict: 'course_id' });
         if (error) {
           status(`Save failed: ${error.message}`);
           return;
@@ -407,7 +429,7 @@ const clientData = {
           (controls.querySelector(`[${attr}]`) as HTMLElement).hidden = !state.ranking;
         }
         signoutBtn.hidden = !(state.ranking && state.signedIn);
-        if (state.ranking && supabase && !state.signedIn) signinForm.hidden = false;
+        if (state.ranking && useSupabase && !state.signedIn) signinForm.hidden = false;
         if (!state.ranking) signinForm.hidden = true;
         status(state.ranking ? 'Drag a slider, then Save.' : '');
         render();
@@ -437,20 +459,27 @@ const clientData = {
       }
 
       if (button.hasAttribute('data-signout')) {
-        supabase?.auth.signOut().then(() => {
-          state.signedIn = false;
-          signoutBtn.hidden = true;
-          status('Signed out.');
-        });
+        loadClient()
+          .then((client) => client.auth.signOut())
+          .then(() => {
+            state.signedIn = false;
+            state.ranking = false;
+            signoutBtn.hidden = true;
+            signinForm.hidden = true;
+            applyEditorVisibility();
+            status('Signed out.');
+            render();
+          });
       }
     });
 
     signinForm?.addEventListener('submit', async (event) => {
       event.preventDefault();
-      if (!supabase) return;
+      if (!useSupabase) return;
       const data = new FormData(signinForm);
       status('Signing in…');
-      const { error } = await supabase.auth.signInWithPassword({
+      const client = await loadClient();
+      const { error } = await client.auth.signInWithPassword({
         email: String(data.get('email')),
         password: String(data.get('password')),
       });
@@ -461,8 +490,9 @@ const clientData = {
       signinForm.reset();
       signinForm.hidden = true;
       state.signedIn = true;
+      applyEditorVisibility();
       signoutBtn.hidden = !state.ranking;
-      status('Signed in — Save will publish for everyone.');
+      status('Signed in on this device — Save publishes for everyone.');
     });
 
     controls.addEventListener('input', (event) => {
@@ -492,14 +522,25 @@ const clientData = {
       event.returnValue = '';
     });
 
-    if (supabase) {
-      supabase.auth.getSession().then(({ data }) => {
-        state.signedIn = Boolean(data.session);
-        signoutBtn.hidden = !(state.ranking && state.signedIn);
-      });
+    if (useSupabase) {
+      // Checking localStorage avoids pulling in the SDK just to discover that
+      // a visitor is not signed in. The session refreshes itself, so signing in
+      // on a device is a one-time thing, not something you do on every visit.
+      if (hasStoredSession()) {
+        loadClient()
+          .then((client) => client.auth.getSession())
+          .then(({ data }) => {
+            state.signedIn = Boolean(data.session);
+            signoutBtn.hidden = !(state.ranking && state.signedIn);
+            applyEditorVisibility();
+          });
+      } else if (new URLSearchParams(location.search).has('edit')) {
+        signinForm.hidden = false;
+      }
       refreshFromSupabase();
     }
 
+    applyEditorVisibility();
     render();
   </script>
 </Base>

@@ -71,10 +71,23 @@ come from depends on whether Supabase is configured:
 Both values are meant to be public; row-level security is what protects writes.
 The `service_role` key must never go in either file.
 
-With that done, "Rank them" on the live site asks you to sign in, and Save
-writes straight to the database. The build bakes current values into the HTML,
-and the page re-checks the database on load, so a stale build never shows stale
-numbers. If Supabase is unreachable the seed JSON is used instead.
+### What visitors see
+
+Nothing about editing. No sign-in, no account, no ranking controls — just the
+scored list with the filters, the sort, and the legend. The page is public and
+shareable as-is.
+
+The editor appears only when you are signed in. To sign in, visit
+`/coursework?edit`. The session persists and refreshes itself, so that is a
+one-time step per device rather than something you do on each visit.
+
+Reading uses a plain REST call, so the ~220 kB Supabase SDK is never sent to
+visitors; it loads on demand only when you sign in or save. The coursework page
+ships about 8 kB of JavaScript to everyone else.
+
+The build bakes current values into the HTML, and the page re-checks the
+database on load, so a stale deploy never shows stale numbers. If Supabase is
+unreachable the seed JSON is used instead and the build still succeeds.
 
 ## Layout
 
