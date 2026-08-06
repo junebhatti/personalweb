@@ -84,22 +84,6 @@ export const categories: Category[] = [
     ],
   },
   {
-    key: 'music',
-    label: 'music',
-    groups: [
-      {
-        entries: [
-          { title: 'The Strokes', note: 'or anything Julian Casablancas' },
-          { title: 'Blue Coupe', by: 'Twin Peaks' },
-          { title: 'Flimsier', by: 'King Krule' },
-          { title: 'Us and Them', by: 'Pink Floyd' },
-          { title: 'Song on the Beach', by: 'Arcade Fire' },
-          { title: 'Shake the Frost (Live)', by: 'Tyler Childers' },
-        ],
-      },
-    ],
-  },
-  {
     key: 'podcasts',
     label: 'podcasts',
     groups: [

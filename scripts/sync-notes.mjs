@@ -105,12 +105,15 @@ async function collect() {
     }
 
     // Prefer an explicit date, then Obsidian's created field, then the file.
-    const date =
-      isoDate(data.date) ??
-      isoDate(data.created) ??
-      isoDate((await stat(path)).birthtime);
-
-    published.push({ slug: data.slug || slugify(name), date, text, name });
+    published.push({
+      slug: data.slug || slugify(name),
+      // `date` pins a note permanently. Everything else is a starting point
+      // that a rewrite is allowed to move — see resolveDate below.
+      pinned: isoDate(data.date),
+      firstSeen: isoDate(data.created) ?? isoDate((await stat(path)).birthtime),
+      text,
+      name,
+    });
   }
 
   return { published, skipped };
@@ -121,10 +124,59 @@ async function existingGenerated() {
   const files = (await readdir(OUT)).filter((f) => f.endsWith('.md'));
   const mine = new Map();
   for (const file of files) {
-    const { data } = parseFrontmatter(await readFile(join(OUT, file), 'utf-8'));
-    if (data.source === MARKER) mine.set(basename(file, '.md'), file);
+    const { data, body } = parseFrontmatter(await readFile(join(OUT, file), 'utf-8'));
+    if (data.source === MARKER) {
+      mine.set(basename(file, '.md'), { file, date: data.date, body: body.trim() });
+    }
   }
   return mine;
+}
+
+/**
+ * How much two versions of a note have in common, 0 to 1, comparing bags of
+ * words. Fixing a typo scores near 1; a rewrite that keeps the subject but
+ * little else scores low.
+ */
+function similarity(a, b) {
+  const words = (s) => s.toLowerCase().match(/[a-z0-9']+/g) ?? [];
+  const A = words(a);
+  const B = words(b);
+  if (!A.length && !B.length) return 1;
+  if (!A.length || !B.length) return 0;
+
+  const counts = new Map();
+  for (const w of A) counts.set(w, (counts.get(w) ?? 0) + 1);
+  let common = 0;
+  for (const w of B) {
+    const n = counts.get(w) ?? 0;
+    if (n > 0) {
+      common++;
+      counts.set(w, n - 1);
+    }
+  }
+  return (2 * common) / (A.length + B.length);
+}
+
+/** Below this, an edit counts as a rewrite rather than a revision. */
+const REWRITE_BELOW = 0.5;
+
+const today = new Date().toISOString().slice(0, 10);
+
+/**
+ * A published note keeps the date it went out with, so editing it does not
+ * shuffle it to the top of the page. Two things override that: an explicit
+ * `date` in the vault pins it for good, and a rewrite substantial enough to
+ * make it a different note re-dates it to today.
+ */
+function resolveDate(note, previous) {
+  if (note.pinned) return { date: note.pinned, why: null };
+  if (!previous?.date) return { date: note.firstSeen, why: null };
+
+  const score = similarity(previous.body, note.text);
+  if (score < REWRITE_BELOW) {
+    return { date: today, why: `rewritten (${Math.round(score * 100)}% of the old text)` };
+  }
+  return { date: previous.date, why: null };
 }
 
 const { published, skipped } = await collect();
@@ -132,7 +184,10 @@ const generated = await existingGenerated();
 
 let written = 0;
 for (const note of published) {
-  const front = `---\ndate: ${note.date}\nsource: ${MARKER}\n---\n\n`;
+  const previous = generated.get(note.slug);
+  const { date, why } = resolveDate(note, previous);
+
+  const front = `---\ndate: ${date}\nsource: ${MARKER}\n---\n\n`;
   const target = join(OUT, `${note.slug}.md`);
   const next = front + note.text + '\n';
 
@@ -144,14 +199,15 @@ for (const note of published) {
   if (current !== next) {
     if (!dryRun) await writeFile(target, next, 'utf-8');
     console.log(`  ${current === null ? '+' : '~'} ${note.slug}`);
+    if (why) console.log(`      re-dated to ${date} — ${why}`);
     written++;
   }
   generated.delete(note.slug);
 }
 
 // Anything we generated before and is no longer flagged gets pulled down.
-for (const [slug, file] of generated) {
-  if (!dryRun) await unlink(join(OUT, file));
+for (const [slug, entry] of generated) {
+  if (!dryRun) await unlink(join(OUT, entry.file));
   console.log(`  - ${slug} (no longer published)`);
 }
 
