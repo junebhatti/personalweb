@@ -276,6 +276,24 @@ a:hover {
   color: #888;
 }
 
+/* A section can hold sub-groups — Movies and Shows, or a restaurant city. */
+.list-group + .list-group {
+  margin-top: 20px;
+}
+
+.group-label {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.group-aside {
+  font-size: 15px;
+  font-style: italic;
+  color: #888;
+  margin-bottom: 12px;
+}
+
 /* --- Coursework --- */
 
 /* The view wrapper is one flex child of .list-content, so it has to space its

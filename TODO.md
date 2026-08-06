@@ -28,13 +28,14 @@ notes are live. Remaining:
 
 ## 3. Favorites
 
-`/favorites` has real books; the other three sections still read
-"Add a few here."
+Everything from the old site is in, in `src/pages/favorites.astro`. You said you
+want to condense it — each entry is one object in the `sections` array, so
+cutting is deleting lines.
 
-- [ ] Podcasts
-- [ ] Movies & Shows
-- [ ] Music
-- [ ] Add any more books
+- [ ] Trim it down to what you actually want to keep
+- [ ] Decide whether Restaurants and "Blogs, videos, channels" stay — neither was
+      in the design, and the latter has a single entry (Keith D)
+- [ ] `The Motorcycle Diaries` and `Casablanca` carry no comment, unlike the rest
 
 ## 4. Interests
 
