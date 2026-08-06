@@ -57,8 +57,12 @@ computation", "Los Angeles vs. New York, endlessly", and so on.
 
 Not asked for, but outstanding.
 
-- [ ] Deploy to Vercel — the repo is pushed but nothing is hosted yet
-- [ ] Decide what happens to `junebhatti.github.io` once this replaces it
+- [x] Deployed — live at junaidrbhatti.com (Vercel + Cloudflare DNS);
+      the vercel.app URL redirects there
+- [ ] Decide what happens to `junebhatti.github.io` now that this replaces it
+- [ ] Optional: make www redirect to the bare domain (remove + re-add the www
+      domain in Vercel, choosing "Redirect")
+- [ ] Cloudflare auto-renew is on by default — confirm it stays on
 - [ ] More videos: `/videos` has the one entry
 - [ ] Post bodies are real for all eight essays, but check formatting on the
       longer ones once they are live
