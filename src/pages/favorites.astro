@@ -37,7 +37,11 @@ import { categories } from '../data/favorites';
                   <div class="fav-entry">
                     <dt>
                       <span class="fav-title">{entry.title}</span>
-                      {entry.by && <span class="fav-by">{entry.by}</span>}
+                      {(entry.by || entry.when) && (
+                        <span class="fav-by">
+                          {[entry.by, entry.when].filter(Boolean).join(' · ')}
+                        </span>
+                      )}
                     </dt>
                     <dd>{entry.note}</dd>
                   </div>

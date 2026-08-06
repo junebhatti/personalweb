@@ -26,14 +26,12 @@ Done — Personal Dashboard, PodNotes, and this website are in
 
 ## 3. Favorites
 
-Everything from the old site is in, in `src/pages/favorites.astro`. You said you
-want to condense it — each entry is one object in the `sections` array, so
-cutting is deleting lines.
+Trimmed per Junaid: books carry read-dates, movies and shows merged into one
+category, restaurants and music gone, podcasts updated (Lex Fridman, David
+Senra, Uncapped, Hidden Voices).
 
-- [ ] Trim it down to what you actually want to keep
-- [ ] Decide whether Restaurants and "Blogs, videos, channels" stay — neither was
-      in the design, and the latter has a single entry (Keith D)
-- [ ] `The Motorcycle Diaries` and `Casablanca` carry no comment, unlike the rest
+- [ ] Notes for David Senra and Uncapped, if wanted — they're bare titles now
+- [ ] Possible new cross-format categories discussed: thinkers / places / words
 
 ## 4. Interests
 

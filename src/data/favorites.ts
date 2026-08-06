@@ -3,6 +3,8 @@ export interface Entry {
   /** Author, artist, network — whoever made it. Kept apart from the note so
    *  attribution and opinion are never doing the same job in one sentence. */
   by?: string;
+  /** Roughly when it was read/watched — shown beside the attribution. */
+  when?: string;
   note?: string;
 }
 
@@ -23,21 +25,25 @@ export const categories: Category[] = [
           {
             title: 'Moby Dick',
             by: 'Herman Melville',
+            when: 'spring 2025',
             note: "the most profound novel I've ever read, discussed it in an English class and fell in love. Billy Budd is also fantastic",
           },
           {
             title: 'The Red Badge of Courage',
             by: 'Stephen Crane',
+            when: 'summer 2025',
             note: 'my favorite war book',
           },
           {
             title: 'Walden',
             by: 'Henry David Thoreau',
+            when: 'winter 2024',
             note: 'everyone who cares about nature and craves ways to get away from society should read this',
           },
           {
             title: 'The Royal Game',
             by: 'Stefan Zweig',
+            when: 'summer 2025',
             note: 'an epic novella about chess, showcasing the power of the mind',
           },
         ],
@@ -45,32 +51,19 @@ export const categories: Category[] = [
     ],
   },
   {
-    key: 'movies',
-    label: 'movies',
+    key: 'movies-shows',
+    label: 'movies + shows',
     groups: [
       {
         aside: '@junaidb on letterboxd',
         entries: [
           { title: 'City of God', note: 'no words, just perfection' },
           { title: 'Good Will Hunting', note: 'insane debut' },
-          { title: 'The Motorcycle Diaries' },
           { title: 'The Departed', note: 'ending scene + song make this a 10/10' },
           { title: 'Fantastic Mr. Fox', note: "be who you're meant to be" },
-          { title: 'Casablanca' },
           { title: 'Miracle', note: 'greatest sports movie imo' },
-        ],
-      },
-    ],
-  },
-  {
-    key: 'shows',
-    label: 'shows',
-    groups: [
-      {
-        entries: [
           {
             title: 'True Detective',
-            by: 'Season 1',
             note: 'solidified my number #1 favorite actor as Matthew McConaughey',
           },
           {
@@ -93,37 +86,9 @@ export const categories: Category[] = [
             title: 'Lex Fridman',
             note: "has some of the world's greatest thinkers on here, have really fallen in love with these recently",
           },
-          {
-            title: 'The 7',
-            by: 'Washington Post',
-            note: 'I start my day with seven headlines from around the world',
-          },
+          { title: 'David Senra' },
+          { title: 'Uncapped', by: 'Jack Altman' },
           { title: 'Hidden Voices', note: 'a handful of these have been pretty insightful' },
-        ],
-      },
-    ],
-  },
-  {
-    key: 'restaurants',
-    label: 'restaurants',
-    groups: [
-      {
-        label: 'Los Angeles',
-        entries: [
-          { title: 'Holbox', note: 'fish tacos' },
-          { title: 'Sun Nong Dan', note: 'korean' },
-          { title: 'Urth Cafe', note: 'european vibe' },
-          { title: 'Berenjak', note: 'persian' },
-        ],
-      },
-      {
-        label: 'New York',
-        entries: [
-          { title: 'Los Mariscos', note: 'fish tacos' },
-          { title: 'Pause Cafe', note: 'moroccan cafe' },
-          { title: "Jonny's Pizza", note: 'speaks for itself' },
-          { title: 'Mojo East', note: 'omakase' },
-          { title: 'Cafe Mogador', note: 'moroccan / middle eastern' },
         ],
       },
     ],
