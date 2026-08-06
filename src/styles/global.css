@@ -147,6 +147,35 @@ a:hover {
   color: #111;
 }
 
+/* --- Projects: one year heading per group, smaller entries --- */
+
+.project-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+}
+
+.project-year {
+  font-size: 15px;
+  color: #888;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+}
+
+.project-entries {
+  gap: 26px;
+}
+
+.project-entries .entry-title {
+  font-size: clamp(18px, 1.8vw, 21px);
+}
+
+.project-entries .entry-desc {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
 /* Video entries lead with a thumbnail; the date/title below match Writing. */
 .video-entry {
   gap: 12px;
@@ -516,13 +545,7 @@ a:hover {
   background: #f6f6f4;
 }
 
-.interest-note {
-  font-size: 13px;
-  color: #888;
-  align-self: flex-start;
-  margin-top: 2px;
-  white-space: nowrap;
-}
+
 
 @media (max-width: 600px) {
   .interest-line {

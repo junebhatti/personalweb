@@ -243,6 +243,17 @@ export const courses: Course[] = [
   },
 ];
 
+/**
+ * Classes in progress this semester. They sit outside the scored list — a
+ * course gets its scores and its comment once it is over.
+ */
+export const currentCourses: string[] = [
+  'Real Analysis',
+  'Intro to CS',
+  'Intermediate Urdu',
+  'Minds and Machines',
+];
+
 /** Weighted average of every dimension, on a 0–5 scale. */
 export function total(scores: Scores): number {
   const weighted = DIMENSIONS.reduce((sum, d) => sum + (scores[d.key] ?? 0) * d.weight, 0);

@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import {
   courses,
+  currentCourses,
   DIMENSIONS,
   SCORE_MAX,
   total,
@@ -52,6 +53,8 @@ const byScore = [...courses].sort((a, b) => total(b.scores) - total(a.scores));
         <button type="button" class="sort-option is-on" data-sort="score">by score</button>
         <span class="sort-slash">/</span>
         <button type="button" class="sort-option" data-sort="section">by section</button>
+        <span class="sort-slash">/</span>
+        <button type="button" class="sort-option" data-sort="current">current</button>
       </div>
 
       <div data-view="score">
@@ -84,26 +87,34 @@ const byScore = [...courses].sort((a, b) => total(b.scores) - total(a.scores));
           );
         })}
       </div>
+
+      <div data-view="current" hidden>
+        <div class="list-items">
+          {currentCourses.map((name) => (
+            <div class="course-line">
+              <span class="item-name">{name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   </div>
 
   <script is:inline>
-    // Both orderings are already in the page; this only swaps which one shows.
+    // Every view is already in the page; this only swaps which one shows.
     (function () {
       const toggle = document.querySelector('[data-sort-toggle]');
-      const views = {
-        section: document.querySelector('[data-view="section"]'),
-        score: document.querySelector('[data-view="score"]'),
-      };
       if (!toggle) return;
+      const views = Array.from(document.querySelectorAll('[data-view]'));
       toggle.hidden = false;
 
       toggle.addEventListener('click', function (event) {
         const button = event.target.closest('[data-sort]');
         if (!button) return;
         const choice = button.dataset.sort;
-        views.section.hidden = choice !== 'section';
-        views.score.hidden = choice !== 'score';
+        views.forEach(function (view) {
+          view.hidden = view.dataset.view !== choice;
+        });
         toggle.querySelectorAll('[data-sort]').forEach(function (el) {
           el.classList.toggle('is-on', el === button);
         });

@@ -2,31 +2,36 @@
 import Base from '../layouts/Base.astro';
 
 interface Project {
-  year: string;
   title: string;
   description: string;
   /** Optional — a title without one renders as plain text in the same style. */
   href?: string;
 }
 
-const projects: Project[] = [
+/** Things in progress or just ideas right now — no year, they aren't done. */
+const current: Project[] = [];
+
+/** Finished work, grouped under one year heading per group. */
+const years: { year: string; projects: Project[] }[] = [
   {
     year: '2026',
-    title: 'Personal Dashboard',
-    description:
-      'Built a website and mobile app that encompasses all my personal data — tasks, calendars, health data, food tracking, project managing, notes, flashcards, etc.',
-  },
-  {
-    year: '2026',
-    title: 'PodNotes',
-    description:
-      'A personal app that pulls the currently playing Spotify podcast and acts as a centralized location for taking notes on podcasts.',
-  },
-  {
-    year: '2026',
-    title: 'This website',
-    description: 'A portfolio for writing and interests.',
-    href: 'https://junaidrbhatti.com',
+    projects: [
+      {
+        title: 'Personal Dashboard',
+        description:
+          'Built a website and mobile app that encompasses all my personal data — tasks, calendars, health data, food tracking, project managing, notes, flashcards, etc.',
+      },
+      {
+        title: 'PodNotes',
+        description:
+          'A personal app that pulls the currently playing Spotify podcast and acts as a centralized location for taking notes on podcasts.',
+      },
+      {
+        title: 'This website',
+        description: 'A portfolio for writing and interests.',
+        href: 'https://junaidrbhatti.com',
+      },
+    ],
   },
 ];
 ---
@@ -40,18 +45,44 @@ const projects: Project[] = [
     <div class="content">
       <div class="section-label">Things I've built</div>
 
-      <div class="entries">
-        {projects.map((project) => (
-          <div class="entry">
-            <div class="entry-date">{project.year}</div>
-            {project.href ? (
-              <a href={project.href} target="_blank" rel="noopener" class="entry-title">
-                {project.title}
-              </a>
-            ) : (
-              <span class="entry-title entry-title-plain">{project.title}</span>
-            )}
-            <div class="entry-desc">{project.description}</div>
+      <div class="project-groups">
+        {current.length > 0 && (
+          <div class="project-group">
+            <div class="project-year">current</div>
+            <div class="entries project-entries">
+              {current.map((project) => (
+                <div class="entry">
+                  {project.href ? (
+                    <a href={project.href} target="_blank" rel="noopener" class="entry-title">
+                      {project.title}
+                    </a>
+                  ) : (
+                    <span class="entry-title entry-title-plain">{project.title}</span>
+                  )}
+                  <div class="entry-desc">{project.description}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {years.map((group) => (
+          <div class="project-group">
+            <div class="project-year">{group.year}</div>
+            <div class="entries project-entries">
+              {group.projects.map((project) => (
+                <div class="entry">
+                  {project.href ? (
+                    <a href={project.href} target="_blank" rel="noopener" class="entry-title">
+                      {project.title}
+                    </a>
+                  ) : (
+                    <span class="entry-title entry-title-plain">{project.title}</span>
+                  )}
+                  <div class="entry-desc">{project.description}</div>
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>

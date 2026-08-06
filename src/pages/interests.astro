@@ -27,7 +27,6 @@ const hasImage = (img?: string) => Boolean(img && existsSync(publicDir + img));
             {hasImage(interest.img) && (
               <img class="interest-thumb" src={interest.img} alt="" loading="lazy" />
             )}
-            {interest.note && <span class="interest-note">{interest.note}</span>}
           </div>
         ))}
       </div>
