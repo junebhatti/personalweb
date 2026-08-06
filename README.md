@@ -49,20 +49,16 @@ Courses live in `src/data/coursework.ts` — one object each, holding the name,
 the comment, whether it counts as important or loved, and a 0–1 score on every
 dimension. Adding a course is appending to that list; nothing else to touch.
 
-Each dimension is defined in `DIMENSIONS` at the top of the same file, with a
-one-line explanation of what it means and a weight. They are not equal: the
-four full-weight ones (interesting, teaching, enjoyment, durability) describe
-whether the class was good and whether it lasted, and the three half-weight
-ones (applicability, rigor, surprise) qualify that without being able to carry
-a course on their own.
+The dimensions and their weights are in `DIMENSIONS` at the top of the same
+file. Applicability and surprise count half; the rest count full. The number in
+front of a course is the weighted average on a 0–5 scale — straight 1s land on
+exactly 5 whatever the weights sum to, so adding or dropping a dimension does
+not shift what a 4.1 means.
 
-The number in front of a course is the weighted average on a 0–5 scale. Straight
-1s come out at exactly 5 whatever the weights sum to, so adding or dropping a
-dimension does not shift what a 4.1 means.
-
-Every dimension points the same way — higher is better. That is why one is
-rigor rather than difficulty: a class that was merely laborious should not
-outrank one that made you think.
+All of them point the same way, more is better. That is why one is rigor rather
+than difficulty: it covers conceptual difficulty along with the time and effort
+a class asked for, so a hard course reads as demanding rather than as a
+complaint.
 
 The page renders both orderings and a small inline script swaps between them,
 so it stays static and ships no bundled JavaScript. Without JS it shows the

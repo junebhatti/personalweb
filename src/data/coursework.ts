@@ -1,60 +1,55 @@
 /**
- * The scoring dimensions. Add or remove one here and the score follows — this
+ * The scoring dimensions. Add or remove one here and the page follows — this
  * list is the only place they are defined.
  *
- * Every dimension points the same way: higher is better. That is why one of
- * them is rigor rather than difficulty — a class that is merely laborious
- * should not outrank one that made you think.
+ * All of them point the same way: more is better. That is why one is rigor
+ * rather than difficulty — it covers conceptual difficulty along with the time
+ * and effort a class asked for, so a hard course reads as demanding rather than
+ * as a complaint.
  *
- * They do not all count equally. The four full-weight ones describe whether the
- * class was good and whether it lasted; the three half-weight ones qualify that
- * without being able to carry a course on their own.
+ * Applicability and surprise count half; everything else counts full.
  */
 export const DIMENSIONS = [
   {
     key: 'interesting',
     label: 'Interesting',
-    definition:
-      'How much the subject itself pulled you in, separate from whether the class was any good.',
+    definition: 'How intellectually stimulating it was',
     weight: 1,
   },
   {
     key: 'teaching',
     label: 'Teaching',
-    definition:
-      'The professor and the room — clarity, discussion, whether it was worth showing up for.',
+    definition: 'The professor, and the style of teaching',
     weight: 1,
   },
   {
     key: 'enjoyment',
     label: 'Enjoyment',
-    definition: 'The week-to-week experience of actually being in it.',
+    definition: 'The week-to-week experience of being in it',
     weight: 1,
   },
   {
     key: 'durability',
     label: 'Durability',
-    definition: 'How much of it is still with you a year later.',
+    definition: 'Whether it stayed with me after',
+    weight: 1,
+  },
+  {
+    key: 'rigor',
+    label: 'Rigor',
+    definition: 'Conceptual difficulty, time and effort',
     weight: 1,
   },
   {
     key: 'applicability',
     label: 'Applicability',
-    definition:
-      'Does it do work for you outside the class — in a job, another course, or ordinary life.',
-    weight: 0.5,
-  },
-  {
-    key: 'rigor',
-    label: 'Rigor',
-    definition:
-      'Did it demand real thinking. High means conceptually hard, not just a lot of work.',
+    definition: 'Whether it works outside the class',
     weight: 0.5,
   },
   {
     key: 'surprise',
     label: 'Surprise',
-    definition: "Did it change your mind, or show you something you didn't expect.",
+    definition: 'Whether it changed how I think',
     weight: 0.5,
   },
 ] as const;
@@ -95,8 +90,8 @@ export const courses: Course[] = [
       teaching: 1,
       enjoyment: 1,
       durability: 1,
-      applicability: 0.7,
       rigor: 0.85,
+      applicability: 0.7,
       surprise: 0.9,
     },
   },
@@ -111,8 +106,8 @@ export const courses: Course[] = [
       teaching: 0.7,
       enjoyment: 0.95,
       durability: 0.9,
-      applicability: 0.9,
       rigor: 0.85,
+      applicability: 0.9,
       surprise: 0.85,
     },
   },
@@ -126,8 +121,8 @@ export const courses: Course[] = [
       teaching: 0.65,
       enjoyment: 0.85,
       durability: 0.85,
-      applicability: 0.9,
       rigor: 0.8,
+      applicability: 0.9,
       surprise: 0.8,
     },
   },
@@ -141,8 +136,8 @@ export const courses: Course[] = [
       teaching: 0.6,
       enjoyment: 0.9,
       durability: 0.8,
+      rigor: 0.6,
       applicability: 0.5,
-      rigor: 0.5,
       surprise: 0.45,
     },
   },
@@ -156,8 +151,8 @@ export const courses: Course[] = [
       teaching: 0.55,
       enjoyment: 0.7,
       durability: 0.6,
+      rigor: 0.6,
       applicability: 0.8,
-      rigor: 0.55,
       surprise: 0.4,
     },
   },
@@ -171,8 +166,8 @@ export const courses: Course[] = [
       teaching: 0.5,
       enjoyment: 0.45,
       durability: 0.6,
+      rigor: 0.8,
       applicability: 0.85,
-      rigor: 0.35,
       surprise: 0.25,
     },
   },
@@ -187,8 +182,8 @@ export const courses: Course[] = [
       teaching: 0.85,
       enjoyment: 0.6,
       durability: 0.65,
+      rigor: 0.55,
       applicability: 0.85,
-      rigor: 0.5,
       surprise: 0.25,
     },
   },
@@ -203,8 +198,8 @@ export const courses: Course[] = [
       teaching: 0.45,
       enjoyment: 0.25,
       durability: 0.6,
+      rigor: 0.45,
       applicability: 0.8,
-      rigor: 0.35,
       surprise: 0.2,
     },
   },
@@ -219,8 +214,8 @@ export const courses: Course[] = [
       teaching: 0.4,
       enjoyment: 0.4,
       durability: 0.45,
-      applicability: 0.6,
       rigor: 0.2,
+      applicability: 0.6,
       surprise: 0.3,
     },
   },
@@ -234,8 +229,8 @@ export const courses: Course[] = [
       teaching: 0.35,
       enjoyment: 0.35,
       durability: 0.3,
-      applicability: 0.35,
       rigor: 0.3,
+      applicability: 0.35,
       surprise: 0.3,
     },
   },
@@ -249,8 +244,8 @@ export const courses: Course[] = [
       teaching: 0.4,
       enjoyment: 0.25,
       durability: 0.3,
-      applicability: 0.45,
       rigor: 0.35,
+      applicability: 0.45,
       surprise: 0.2,
     },
   },
@@ -265,8 +260,8 @@ export const courses: Course[] = [
       teaching: 0.3,
       enjoyment: 0.3,
       durability: 0.25,
-      applicability: 0.3,
       rigor: 0.2,
+      applicability: 0.3,
       surprise: 0.2,
     },
   },
@@ -280,8 +275,8 @@ export const courses: Course[] = [
       teaching: 0.25,
       enjoyment: 0.2,
       durability: 0.25,
-      applicability: 0.25,
       rigor: 0.2,
+      applicability: 0.25,
       surprise: 0.15,
     },
   },

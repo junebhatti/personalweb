@@ -288,29 +288,34 @@ a:hover {
 
 .scoring {
   font-size: 15px;
-  max-width: 640px;
+  max-width: 560px;
 }
 
-.scoring-lead {
-  margin: 0 0 18px;
-  line-height: 1.55;
-  color: #555;
+.scoring summary {
+  color: #45539b;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.scoring summary:hover {
+  color: #1a1aff;
 }
 
 .scoring-list {
-  margin: 0;
+  margin: 16px 0 0;
 }
 
 .scoring-item {
   display: grid;
-  grid-template-columns: 148px 1fr;
+  grid-template-columns: 118px 1fr 28px;
   gap: 16px;
-  margin-bottom: 8px;
-  line-height: 1.5;
+  padding: 7px 0;
+  border-top: 1px solid #eee;
+  line-height: 1.4;
 }
 
-.scoring-item:last-child {
-  margin-bottom: 0;
+.scoring-item:first-child {
+  border-top-color: #ddd;
 }
 
 .scoring-item dt {
@@ -319,16 +324,21 @@ a:hover {
 
 .scoring-item dd {
   margin: 0;
-  color: #555;
+  color: #666;
 }
 
 .scoring-weight {
-  color: #888;
+  text-align: right;
+  color: #999;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Dimension names read as a list mid-sentence; capitalising ties them to the
-   rows below without resorting to bold. */
-.scoring-caps {
+.scoring-total {
+  border-top-color: #ddd;
+}
+
+.scoring-total dt,
+.scoring-total dd {
   color: #111;
 }
 
@@ -340,12 +350,16 @@ a:hover {
   margin-bottom: 4px;
 }
 
+/* The one you can click looks like every other link on the site — blue with a
+   rule under it. The one you are already on is plain ink with no rule, so it
+   reads as a label rather than a target. */
 .sort-option {
   font: inherit;
   font-size: 15px;
   color: #45539b;
   background: none;
   border: 0;
+  border-bottom: 1px solid currentColor;
   padding: 0;
   cursor: pointer;
   transition: color 120ms;
@@ -357,6 +371,7 @@ a:hover {
 
 .sort-option.is-on {
   color: #111;
+  border-bottom-color: transparent;
   cursor: default;
 }
 
@@ -538,9 +553,8 @@ a:hover {
   }
 
   .scoring-item {
-    grid-template-columns: 1fr;
-    gap: 2px;
-    margin-bottom: 14px;
+    grid-template-columns: 104px 1fr 24px;
+    gap: 10px;
   }
 }
 
