@@ -4,17 +4,15 @@ Roughly in priority order.
 
 ## 1. Obsidian → notes
 
-Pipeline is built — `npm run notes` copies flagged notes from
-`Writing/Brain Dump` into the site. See the README. What is left:
+Done — `Writing/Brain Dump` mirrors to `/notes` via `npm run notes`. Eleven
+notes are live. Remaining:
 
-- [ ] Decide which notes to publish and add `publish: true` to them
-- [ ] Sort out the four already-published essays sitting in Brain Dump
-      (be courageous / ramadan / judging religion / stop optimizing) — they are
-      live under `/writing`, so publishing them as notes would duplicate them
-- [ ] Delete the four placeholder notes in `src/content/notes/` once real ones exist
-- [ ] Install the Templater template so new notes get frontmatter automatically
-- [ ] Set up the launchd agent or cron job if the manual `npm run notes` gets old
-- [ ] `is it more noble to question or to accept.md` is empty — write it or bin it
+- [ ] Set up the launchd agent or cron job so it runs without being asked
+- [ ] Install the Templater template if you want `created` stamped automatically
+- [ ] `is it more noble to question or to accept.md` is empty, so it is skipped —
+      write it or bin it
+- [ ] `identity vs environment.md` ends with a stray "I've" that publishes as its
+      own line
 
 ## 2. Projects
 

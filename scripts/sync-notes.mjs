@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Copies flagged notes out of the Obsidian vault and into src/content/notes.
+ * Mirrors an Obsidian folder into src/content/notes.
  *
- * Publishing is opt-in: a note ships only if its frontmatter says
- * `publish: true`. The Brain Dump folder is a drafting space — it holds essay
- * drafts, unfinished fragments, and pieces already published under /writing —
- * so syncing it wholesale would be wrong. Nothing leaves the vault by default.
+ * The folder is the source of truth: everything in it is published, and taking
+ * a note out — deleting it, or moving it elsewhere in the vault — removes it
+ * from the site on the next run. To keep a note in the folder but off the site,
+ * put `publish: false` in its frontmatter.
  *
  *   node scripts/sync-notes.mjs            # write changes
  *   node scripts/sync-notes.mjs --dry-run  # report only
@@ -51,15 +51,21 @@ function toMarkdown(body) {
     // swallow the blank line above and weld two paragraphs together.
     .replace(/^[ \t]*>[ \t]*\[!\w+\][^\n]*\n/gm, '')
     .replace(/\n{3,}/g, '\n\n')
+    // Obsidian shows a single newline as a line break; Markdown folds it into
+    // the paragraph. Make it an explicit hard break so a note reads on the site
+    // the way it was written in the vault.
+    .replace(/(\S)[ \t]*\n(?![\n\s]*$)(?=[^\n])/g, '$1  \n')
     .trim();
 }
 
 function slugify(name) {
   return name
     .toLowerCase()
+    .replace(/['‘’]/g, '') // weren't -> werent, not weren-t
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
-    .slice(0, 80);
+    .slice(0, 80)
+    .replace(/-+$/, '');
 }
 
 function isoDate(value) {
@@ -86,14 +92,15 @@ async function collect() {
     const { data, body } = parseFrontmatter(raw);
     const name = basename(entry, '.md');
 
-    if (data.publish !== true) {
+    // Everything publishes unless it opts out.
+    if (data.publish === false || data.draft === true) {
       skipped.push(name);
       continue;
     }
 
     const text = toMarkdown(body);
     if (!text) {
-      console.warn(`  ! "${name}" is flagged but empty — skipping`);
+      console.warn(`  ! "${name}" is empty — skipping`);
       continue;
     }
 
@@ -149,10 +156,6 @@ for (const [slug, file] of generated) {
 }
 
 console.log(
-  `\n${published.length} published · ${skipped.length} not flagged · ` +
+  `\n${published.length} published · ${skipped.length} held back · ` +
     `${written} changed · ${generated.size} removed${dryRun ? '  [dry run]' : ''}`
 );
-if (!published.length) {
-  console.log(`\nNothing is flagged yet. Add this to a note's frontmatter:\n`);
-  console.log(`  ---\n  publish: true\n  ---\n`);
-}

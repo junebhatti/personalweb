@@ -1,0 +1,17 @@
+---
+date: 2025-11-16
+source: obsidian
+---
+
+deep thought  
+I think this really important idea I've been fixed on recently has definitely been consuming. I'm obviously heavily referring to social media, but also among other things as well. And while attempting to write I've started to realize that I haven't given myself the space to think organically and to form coherent thoughts. My mind feels constantly cluttered, like a thousand songs and videos are replaying over and over in my head and I'm loosing the ability to think on my own. All my thoughts feel to be developed, taken over, and engulfed upon by 10-30 second videos where I learn and take away absolutely nothing.
+
+I want another chance. I want to reset, and take the hundreds of hours that I've spent scrolling and put them into something of substance, somewhere where I could've learned or created, or appreciated, or even simply been present. I think this illusion that the battle is between scrolling and productivity, but in reality its not a battle, its a compromise. I need to have the power and meet in the middle, where I can sit down and do something that's not either of those. 
+
+You see, there's this fine line in the middle that some may call **living**. Live doesn't have have these radical viewpoints where if you aren't doing something ultra productive, you must be doing something completely deteriorating, there's a middle ground where you can relax the mind. And I think I need a whole lot more of that. That place for me feels very outdoorsy, sitting in nature, in the backyard, on a mountain drinking tea or coffee and maybe having a great chat with your friends.
+
+The problem for me is that I've gotten to a point where when I'm not doing work, some sort of consuming feels like the only other place to go, I haven't been comfortable in my skin to find that leisure activity where I can just belong.
+
+And this all comes back to this idea I've been thinking about where I've had difficulty finding those people who I can just "live" with. Further, I feel that this lack of creative output has put me in position where I have no convictions, I don't feel in control of anything, and I honestly sometimes feel like I don't like the person I'm becoming. A lot of the passions and interests and quirks that I used to have feel like they're fading away, and instead I'm being consumed by the things which I don't enjoy. I want to be back in a place where I'm being monomaniacal towards those hobbies and passions that I once had. The times I would read every night before bed, and practice playing music.
+
+I think the way to get back to being the person I want to be is this really simple, easygoing way of life, where I need to produce more output. I need idea creation, fueling my mind with never ending branches of thoughts that lead to different ideas and building blocks towards being who I want to be. Driving new conversations forward, and finding the people who want to discuss those ideas with me. I need to get obsessed again, obsessed with learning and wanting to show off the things I learned in a genuinely positive light and manner. I want to be that person where when I'm around, people want to have a conversation, and people want to talk about their ideas, passions, and thoughts, but first I need to shine light on myself, and build a few months of work around redefining that character and who that is.

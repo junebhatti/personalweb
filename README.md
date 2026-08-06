@@ -45,40 +45,35 @@ own page files.
 
 ## Notes from Obsidian
 
-Short notes are written in the vault at
-`~/Documents/Obsidian/Junaid/junaidb/Writing/Brain Dump` and copied into
-`src/content/notes/` by a sync script:
+Short notes live in the vault at
+`~/Documents/Obsidian/Junaid/junaidb/Writing/Brain Dump`. That folder is the
+source of truth for `/notes`:
 
 ```bash
 npm run notes
 ```
 
-**Publishing is opt-in.** A note ships only if its frontmatter says
-`publish: true`. That folder is a drafting space — it holds unfinished
-fragments and drafts of pieces already published under `/writing` — so nothing
-leaves the vault unless it is marked. Running the script with nothing flagged
-publishes nothing.
+**Everything in the folder gets published.** To take a note off the site,
+delete it or move it elsewhere in the vault — the next run removes it. To keep
+a note in the folder but off the site, add `publish: false` to its frontmatter.
+Empty files are skipped.
 
-```markdown
----
-created: 2026-03-14
-publish: true
----
+No frontmatter is needed. The date falls back from `date`, to `created`, to the
+file's creation time; the slug comes from the filename.
 
-The note text.
+On the way out the script fixes what would otherwise not survive the trip:
+`%%comments%%`, `![[embeds]]` and callout headers are stripped, `[[wikilinks]]`
+become their label, and single line breaks become hard breaks so a note reads
+the way it looks in Obsidian rather than collapsing into one paragraph.
+
+Notes it writes carry `source: obsidian`, and it only deletes files carrying
+that marker — a note written by hand in `src/content/notes/` is never touched.
+
+Use `--dry-run` to see what would change without writing anything:
+
+```bash
+npm run notes -- --dry-run
 ```
-
-The date comes from `date`, then `created`, then the file's creation time.
-The slug comes from the filename. On the way out the script strips the things
-that are Obsidian-only and would otherwise render as literal text: `%%comments%%`,
-`![[embeds]]`, callout headers, and `[[wikilinks]]` (which become their label).
-
-Notes it writes carry `source: obsidian`. It only ever deletes files carrying
-that marker, so a note written by hand in `src/content/notes/` is safe. Setting
-`publish: false` again removes the note from the site on the next run.
-
-`scripts/quick-thought.template.md` is a Templater template that stamps
-`created` and `publish: false` onto new notes in that folder.
 
 ### Making it automatic
 

@@ -1,0 +1,6 @@
+---
+date: 2026-05-07
+source: obsidian
+---
+
+Doing bad on an exam isn't an excuse to impose self-loathing and self-criticism. It's a process, it happens, we need negative moments in order to have positives. Stop letting these things get to your head. I'm studying for an exam right now, and I'm extremely stressed. I'm honestly not confident at all that I'll do well, but that doesn't mean that I can turn that into anger towards myself. Remember, anger is only supposed to be temporary, because anger doesn't affect anyone except yourself. Being angry at someone is a reflection of you, often times they won't even know. Your relationship with yourself never goes away, so why create self-resentment over something that passes. It's temporary to get a bad grade, to feel like you underperformed, but to hold that in your heart for long periods of time does nothing but hurt your mental state and relationship with yourself – which should be the absolute strongest. Temporary disappointment is fine, and expected, but after a few hours, you hit the gym, go on a run, surround yourself with the people you love and everything's better. Those material, countable metrics should never define who you are. You aren't an accumulation of numbers. You are an accumulation of how you treat people, who you spend time around, and how you decide to use your time.
