@@ -35,12 +35,7 @@ Senra, Uncapped, Hidden Voices).
 
 ## 4. Interests
 
-Done — rebuilt as a big serif index (portfolio-archive style) with your own
-14 keywords, in `src/data/interests.ts`. Remaining:
-
-- [ ] Add the small inline pictures — drop files in `public/interests/` and set
-      `img: '/interests/<file>'` on the entry; the layout already supports them
-- [ ] Add any `note` annotations you want (only "Beli" is set so far)
+Done — big serif index with all 14 keywords and their little picture stamps.
 
 ## 5. Headshot on the home page
 
