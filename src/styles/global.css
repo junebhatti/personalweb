@@ -286,6 +286,52 @@ a:hover {
   gap: 36px;
 }
 
+.scoring {
+  font-size: 15px;
+  max-width: 640px;
+}
+
+.scoring-lead {
+  margin: 0 0 18px;
+  line-height: 1.55;
+  color: #555;
+}
+
+.scoring-list {
+  margin: 0;
+}
+
+.scoring-item {
+  display: grid;
+  grid-template-columns: 148px 1fr;
+  gap: 16px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.scoring-item:last-child {
+  margin-bottom: 0;
+}
+
+.scoring-item dt {
+  color: #111;
+}
+
+.scoring-item dd {
+  margin: 0;
+  color: #555;
+}
+
+.scoring-weight {
+  color: #888;
+}
+
+/* Dimension names read as a list mid-sentence; capitalising ties them to the
+   rows below without resorting to bold. */
+.scoring-caps {
+  color: #111;
+}
+
 .sort-toggle {
   display: flex;
   align-items: baseline;
@@ -489,6 +535,12 @@ a:hover {
   .note-group {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+
+  .scoring-item {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    margin-bottom: 14px;
   }
 }
 

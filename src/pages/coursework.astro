@@ -1,6 +1,26 @@
 ---
 import Base from '../layouts/Base.astro';
-import { courses, total, formatTotal, type Course } from '../data/coursework';
+import {
+  courses,
+  DIMENSIONS,
+  SCORE_MAX,
+  total,
+  formatTotal,
+  type Course,
+} from '../data/coursework';
+
+const weightLabel = (weight: number) =>
+  weight === 1 ? 'full' : weight === 0.5 ? 'half' : `×${weight}`;
+
+const fullWeighted = DIMENSIONS.filter((d) => d.weight === 1);
+const partWeighted = DIMENSIONS.filter((d) => d.weight !== 1);
+
+const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven'];
+const count = (n: number) => WORDS[n] ?? String(n);
+const listNames = (items: readonly { label: string }[]) => {
+  const names = items.map((d) => d.label.toLowerCase());
+  return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+};
 
 const GROUPS = [
   { key: 'important', label: 'Important', match: (c: Course) => c.important },
@@ -19,6 +39,31 @@ const byScore = [...courses].sort((a, b) => total(b.scores) - total(a.scores));
 
     <div class="list-content">
       <div class="section-label">Coursework</div>
+
+      <div class="scoring">
+        <p class="scoring-lead">
+          Every course is scored 0 to 1 on the {DIMENSIONS.length} things below, and the
+          number in front of it is their weighted average out of {SCORE_MAX}. Nothing
+          counts against a course: on all {DIMENSIONS.length}, more is better. Not all of
+          them count the same, though. {count(fullWeighted.length).replace(/^./, (c) => c.toUpperCase())}
+          {' '}of them — <span class="scoring-caps">{listNames(fullWeighted)}</span> — count
+          full, because they decide whether a class was any good and whether it stayed with
+          me. The other {count(partWeighted.length)} —
+          {' '}<span class="scoring-caps">{listNames(partWeighted)}</span> — count half.
+          They sharpen the judgement without being able to carry a course on their own.
+        </p>
+
+        <dl class="scoring-list">
+          {DIMENSIONS.map((d) => (
+            <div class="scoring-item">
+              <dt>
+                {d.label} <span class="scoring-weight">{weightLabel(d.weight)}</span>
+              </dt>
+              <dd>{d.definition}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
 
       <div class="sort-toggle" data-sort-toggle hidden>
         <button type="button" class="sort-option is-on" data-sort="section">by section</button>
