@@ -155,6 +155,8 @@ for (const [slug, file] of generated) {
   console.log(`  - ${slug} (no longer published)`);
 }
 
+for (const name of skipped) console.log(`  · "${name}" is a draft`);
+
 console.log(
   `\n${published.length} published · ${skipped.length} held back · ` +
     `${written} changed · ${generated.size} removed${dryRun ? '  [dry run]' : ''}`

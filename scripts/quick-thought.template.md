@@ -2,16 +2,19 @@
 /*
   Templater template for a new quick thought.
 
-  Copy this file into the vault's Templates folder, then point Templater at it
-  (Settings → Templater → Folder Templates) for Writing/Brain Dump so every new
-  note in there starts with the right frontmatter.
+  Set it as a folder template for Writing/Brain Dump:
+    Settings -> Templater -> Folder Templates -> add
+      Folder:   Writing/Brain Dump
+      Template: Templates/quick thought
 
-  publish starts false on purpose: a note is drafted first and published
-  deliberately, never by accident.
+  New notes then start as drafts. The sync skips anything with draft: true, so
+  a piece you are still writing never publishes itself mid-sentence. When it is
+  ready, untick "draft" in the Properties panel (or delete the line) and it goes
+  live on the next sync.
 */
 -%>
 ---
 created: <% tp.date.now("YYYY-MM-DD") %>
-publish: false
+draft: true
 ---
 

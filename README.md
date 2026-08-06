@@ -53,10 +53,21 @@ source of truth for `/notes`:
 npm run notes
 ```
 
-**Everything in the folder gets published.** To take a note off the site,
-delete it or move it elsewhere in the vault — the next run removes it. To keep
-a note in the folder but off the site, add `publish: false` to its frontmatter.
-Empty files are skipped.
+**Everything in the folder gets published unless it is marked a draft.** A note
+with `draft: true` in its frontmatter is held back; remove that line — or untick
+the box in Obsidian's Properties panel — and it goes live on the next sync. That
+is the confirmation step, so a piece you are still writing does not publish
+itself mid-sentence.
+
+To take a published note off the site, delete it or move it elsewhere in the
+vault; the next run removes it. Empty files are skipped.
+
+New notes get `draft: true` automatically if you set
+`scripts/quick-thought.template.md` as a Templater folder template for Brain
+Dump. Without that, **a note created with no frontmatter publishes on its first
+save** — so either install the template, or draft in a different folder and move
+the note in when it is done. Moving it in is the more foolproof of the two,
+since a note outside the folder cannot publish whatever its frontmatter says.
 
 No frontmatter is needed. The date falls back from `date`, to `created`, to the
 file's creation time; the slug comes from the filename.
