@@ -1,19 +1,32 @@
 ---
 import Base from '../layouts/Base.astro';
 
-// Placeholder entries — swap in real projects.
-const projects = [
+interface Project {
+  year: string;
+  title: string;
+  description: string;
+  /** Optional — a title without one renders as plain text in the same style. */
+  href?: string;
+}
+
+const projects: Project[] = [
   {
     year: '2026',
-    title: 'First project',
-    href: '#',
-    description: 'One line on what it is and why it exists.',
+    title: 'Personal Dashboard',
+    description:
+      'Built a website and mobile app that encompasses all my personal data — tasks, calendars, health data, food tracking, project managing, notes, flashcards, etc.',
   },
   {
-    year: '2025',
-    title: 'Second project',
-    href: '#',
-    description: 'One line on what it is and why it exists.',
+    year: '2026',
+    title: 'PodNotes',
+    description:
+      'A personal app that pulls the currently playing Spotify podcast and acts as a centralized location for taking notes on podcasts.',
+  },
+  {
+    year: '2026',
+    title: 'This website',
+    description: 'A portfolio for writing and interests.',
+    href: 'https://github.com/junebhatti/personalweb',
   },
 ];
 ---
@@ -31,7 +44,13 @@ const projects = [
         {projects.map((project) => (
           <div class="entry">
             <div class="entry-date">{project.year}</div>
-            <a href={project.href} class="entry-title">{project.title}</a>
+            {project.href ? (
+              <a href={project.href} target="_blank" rel="noopener" class="entry-title">
+                {project.title}
+              </a>
+            ) : (
+              <span class="entry-title entry-title-plain">{project.title}</span>
+            )}
             <div class="entry-desc">{project.description}</div>
           </div>
         ))}

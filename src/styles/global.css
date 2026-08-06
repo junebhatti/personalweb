@@ -141,6 +141,12 @@ a:hover {
   color: #555;
 }
 
+/* A project with nothing to link to — ink rather than link blue, so nothing
+   looks clickable that isn't. */
+.entry-title-plain {
+  color: #111;
+}
+
 /* Video entries lead with a thumbnail; the date/title below match Writing. */
 .video-entry {
   gap: 12px;

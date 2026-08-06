@@ -16,15 +16,13 @@ notes are live. Remaining:
 
 ## 2. Projects
 
-`/projects` is still two placeholder entries in `src/pages/projects.astro`.
+Done — Personal Dashboard, PodNotes, and this website are in
+`src/pages/projects.astro`. Remaining:
 
-- [ ] Coding dashboard
-- [ ] This website
-- [ ] The YouTube video / channel as a project entry
-- [ ] Anything else worth listing
-- [ ] Decide what each links to — repo, live demo, or a write-up
-- [ ] Consider whether projects should be Markdown-backed like writing, or stay
-      a hardcoded list (fine while it is short)
+- [ ] Years are all "2026" from folder dates — correct any that are wrong
+- [ ] Dashboard and PodNotes have nothing to link to; add repos or demos if
+      they ever get public homes
+- [ ] The YouTube channel as a project entry, if wanted
 
 ## 3. Favorites
 
