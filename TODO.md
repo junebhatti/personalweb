@@ -37,12 +37,12 @@ cutting is deleting lines.
 
 ## 4. Interests
 
-Worth a rewrite. The current text came from the design handoff rather than from
-you, so it reads like someone's guess at your interests — "proofs over
-computation", "Los Angeles vs. New York, endlessly", and so on.
+Done — rebuilt as a big serif index (portfolio-archive style) with your own
+14 keywords, in `src/data/interests.ts`. Remaining:
 
-- [ ] Rewrite all three columns in your own words
-- [ ] Check the column headings still fit (Numbers / Words / Everything else)
+- [ ] Add the small inline pictures — drop files in `public/interests/` and set
+      `img: '/interests/<file>'` on the entry; the layout already supports them
+- [ ] Add any `note` annotations you want (only "Beli" is set so far)
 
 ## 5. Headshot on the home page
 

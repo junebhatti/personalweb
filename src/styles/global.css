@@ -473,48 +473,54 @@ a:hover {
 .interests-content {
   padding: 48px 28px 96px;
   max-width: 900px;
-  display: flex;
-  flex-direction: column;
-  gap: 44px;
 }
 
-.interests-lead {
-  font-size: clamp(22px, 2.6vw, 32px);
+.interests-content .section-label {
+  margin-bottom: 36px;
+}
+
+/* An index in the style of a portfolio archive: each interest is one big
+   serif line, with a small photo tucked after the word and a little grey
+   annotation floating at its shoulder. The serif is deliberate and local to
+   this page — an archive-page moment inside an otherwise Helvetica site. */
+.interest-line {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+.interest-word {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(30px, 5vw, 52px);
   font-weight: 400;
-  line-height: 1.3;
-  letter-spacing: -0.02em;
-  text-wrap: pretty;
-  max-width: 700px;
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  color: #111;
 }
 
-.interests-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 36px 48px;
+.interest-thumb {
+  height: 0.72em;
+  font-size: clamp(30px, 5vw, 52px);
+  width: auto;
+  max-width: 90px;
+  object-fit: cover;
+  display: block;
+  background: #f6f6f4;
 }
 
-.interests-col {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.interests-col-label {
+.interest-note {
   font-size: 14px;
   color: #888;
+  align-self: flex-start;
+  margin-top: 0.35em;
+  white-space: nowrap;
 }
 
-.interests-items {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: 17px;
-  line-height: 1.5;
-}
-
-.inline-link {
-  text-decoration: none;
-  border-bottom: 1px solid currentColor;
+@media (max-width: 600px) {
+  .interest-line {
+    gap: 10px;
+  }
 }
 
 /* --- Detail pages (Post, Note) --- */
