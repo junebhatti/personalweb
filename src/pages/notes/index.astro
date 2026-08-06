@@ -3,24 +3,33 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { formatDate } from '../../lib/dates';
 
-const notes = (await getCollection('notes')).sort(
+// Newest day first; within a day, most recently written first. `order` carries
+// the time of day — the date field only has the day, so without it same-day
+// notes would sort by slug.
+const all = await getCollection('notes');
+const rank = (n: (typeof all)[number]) => n.data.order ?? n.data.date.valueOf();
+const notes = all.sort(
   (a, b) =>
-    b.data.date.valueOf() - a.data.date.valueOf() || a.id.localeCompare(b.id)
+    b.data.date.valueOf() - a.data.date.valueOf() ||
+    rank(b) - rank(a) ||
+    a.id.localeCompare(b.id)
 );
 
 // Group by date, newest first. A note's index paragraphs come from its raw body.
-const groups: { date: Date; notes: { id: string; paragraphs: string[] }[] }[] = [];
+type Card = { id: string; time?: string; paragraphs: string[] };
+const groups: { date: Date; notes: Card[] }[] = [];
 for (const note of notes) {
   const key = note.data.date.valueOf();
   const paragraphs = (note.body ?? '')
     .trim()
     .split(/\n\s*\n/)
     .filter(Boolean);
+  const card = { id: note.id, time: note.data.time, paragraphs };
   const group = groups.find((g) => g.date.valueOf() === key);
   if (group) {
-    group.notes.push({ id: note.id, paragraphs });
+    group.notes.push(card);
   } else {
-    groups.push({ date: note.data.date, notes: [{ id: note.id, paragraphs }] });
+    groups.push({ date: note.data.date, notes: [card] });
   }
 }
 ---
@@ -41,6 +50,7 @@ for (const note of notes) {
             <div class="note-list">
               {group.notes.map((note) => (
                 <a href={`/notes/${note.id}`} class="note-card">
+                  {note.time && <div class="note-time">{note.time}</div>}
                   {note.paragraphs.map((p) => (
                     <div>{p}</div>
                   ))}

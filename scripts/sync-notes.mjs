@@ -69,8 +69,17 @@ function slugify(name) {
 }
 
 function isoDate(value) {
+  // A bare YYYY-MM-DD passes through untouched — new Date() would read it as
+  // UTC midnight and formatting it locally would shift it back a day.
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
+    return value.trim();
+  }
   const d = new Date(value);
-  return Number.isNaN(d.valueOf()) ? null : d.toISOString().slice(0, 10);
+  if (Number.isNaN(d.valueOf())) return null;
+  // Local day, not UTC — a note written at 11:27 PM belongs to that evening,
+  // not to tomorrow.
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 async function collect() {
@@ -105,12 +114,16 @@ async function collect() {
     }
 
     // Prefer an explicit date, then Obsidian's created field, then the file.
+    const birth = (await stat(path)).birthtime;
     published.push({
       slug: data.slug || slugify(name),
       // `date` pins a note permanently. Everything else is a starting point
       // that a rewrite is allowed to move — see resolveDate below.
       pinned: isoDate(data.date),
-      firstSeen: isoDate(data.created) ?? isoDate((await stat(path)).birthtime),
+      firstSeen: isoDate(data.created) ?? isoDate(birth),
+      // Time of day, for ordering within a date. The date field only carries
+      // the day, so without this, same-day notes sort by slug.
+      birthMs: birth.valueOf(),
       text,
       name,
     });
@@ -126,7 +139,12 @@ async function existingGenerated() {
   for (const file of files) {
     const { data, body } = parseFrontmatter(await readFile(join(OUT, file), 'utf-8'));
     if (data.source === MARKER) {
-      mine.set(basename(file, '.md'), { file, date: data.date, body: body.trim() });
+      mine.set(basename(file, '.md'), {
+        file,
+        date: data.date,
+        order: data.order !== undefined ? Number(data.order) : undefined,
+        body: body.trim(),
+      });
     }
   }
   return mine;
@@ -160,7 +178,7 @@ function similarity(a, b) {
 /** Below this, an edit counts as a rewrite rather than a revision. */
 const REWRITE_BELOW = 0.5;
 
-const today = new Date().toISOString().slice(0, 10);
+const today = isoDate(new Date());
 
 /**
  * A published note keeps the date it went out with, so editing it does not
@@ -187,7 +205,18 @@ for (const note of published) {
   const previous = generated.get(note.slug);
   const { date, why } = resolveDate(note, previous);
 
-  const front = `---\ndate: ${date}\nsource: ${MARKER}\n---\n\n`;
+  // Within a day, notes order by when they were written. A note keeps its
+  // order once published; a re-dated rewrite moves to now.
+  const order = why ? Date.now() : previous?.order ?? note.birthMs;
+
+  // The display time is fixed here, in this machine's timezone, because the
+  // production build runs in UTC and would shift it.
+  const time = new Date(order).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+
+  const front = `---\ndate: ${date}\norder: ${order}\ntime: ${time}\nsource: ${MARKER}\n---\n\n`;
   const target = join(OUT, `${note.slug}.md`);
   const next = front + note.text + '\n';
 

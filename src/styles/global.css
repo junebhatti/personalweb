@@ -207,6 +207,15 @@ a:hover {
   color: #111;
 }
 
+/* The clock time a note was written, at the top of its card. It shares the
+   card's 14px gap below, so it reads as a header rather than a paragraph. */
+.note-time {
+  font-size: 13px;
+  font-weight: 500;
+  color: #888;
+  font-variant-numeric: tabular-nums;
+}
+
 /* --- Other / Connect --- */
 
 .short-content {
