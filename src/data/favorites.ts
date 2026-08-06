@@ -83,12 +83,19 @@ export const categories: Category[] = [
       {
         entries: [
           {
+            title: 'David Senra Podcast',
+            note: 'insightful builders and cool perspectives',
+          },
+          { title: 'Uncapped', by: 'Jack Altman', note: 'investors and builders' },
+          {
             title: 'Lex Fridman',
             note: "has some of the world's greatest thinkers on here, have really fallen in love with these recently",
           },
-          { title: 'David Senra' },
-          { title: 'Uncapped', by: 'Jack Altman' },
-          { title: 'Hidden Voices', note: 'a handful of these have been pretty insightful' },
+          {
+            title: 'Hidden Voices',
+            by: "Alex J O'Connor",
+            note: 'a handful of these have been pretty insightful',
+          },
         ],
       },
     ],

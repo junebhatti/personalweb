@@ -475,51 +475,64 @@ a:hover {
   max-width: 900px;
 }
 
-.interests-content .section-label {
-  margin-bottom: 36px;
+/* An index in the style of a portfolio archive: big serif header, then one
+   serif line per interest with a small photo stamped after the word and a
+   little grey annotation at its shoulder. The serif is deliberate and local
+   to this page — an archive-page moment inside an otherwise Helvetica site. */
+.interests-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(30px, 4.4vw, 48px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: #111;
+  margin: 0 0 36px;
+  max-width: 700px;
 }
 
-/* An index in the style of a portfolio archive: each interest is one big
-   serif line, with a small photo tucked after the word and a little grey
-   annotation floating at its shoulder. The serif is deliberate and local to
-   this page — an archive-page moment inside an otherwise Helvetica site. */
 .interest-line {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 6px;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .interest-word {
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(30px, 5vw, 52px);
+  font-size: clamp(21px, 2.6vw, 30px);
   font-weight: 400;
-  line-height: 1.18;
+  line-height: 1.25;
   letter-spacing: -0.01em;
   color: #111;
 }
 
+/* Every stamp the same size, like the reference index. */
 .interest-thumb {
-  height: 0.72em;
-  font-size: clamp(30px, 5vw, 52px);
-  width: auto;
-  max-width: 90px;
+  width: 34px;
+  height: 34px;
   object-fit: cover;
   display: block;
+  flex-shrink: 0;
   background: #f6f6f4;
 }
 
 .interest-note {
-  font-size: 14px;
+  font-size: 13px;
   color: #888;
   align-self: flex-start;
-  margin-top: 0.35em;
+  margin-top: 2px;
   white-space: nowrap;
 }
 
 @media (max-width: 600px) {
   .interest-line {
     gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .interest-thumb {
+    width: 28px;
+    height: 28px;
   }
 }
 

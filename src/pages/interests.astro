@@ -1,6 +1,14 @@
 ---
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import Base from '../layouts/Base.astro';
 import { interests } from '../data/interests';
+
+// Only render a thumbnail whose file is actually in public/ — entries can
+// carry their img path before the picture lands without shipping a broken
+// image in the meantime.
+const publicDir = fileURLToPath(new URL('../../public', import.meta.url));
+const hasImage = (img?: string) => Boolean(img && existsSync(publicDir + img));
 ---
 
 <Base title="Interests — Junaid Bhatti">
@@ -10,19 +18,14 @@ import { interests } from '../data/interests';
     </div>
 
     <div class="interests-content">
-      <div class="section-label">Talk to me about any of these things</div>
+      <h1 class="interests-title">Talk to me about any of these things</h1>
 
       <div class="interest-index">
         {interests.map((interest) => (
           <div class="interest-line">
             <span class="interest-word">{interest.word}</span>
-            {interest.img && (
-              <img
-                class="interest-thumb"
-                src={interest.img}
-                alt=""
-                loading="lazy"
-              />
+            {hasImage(interest.img) && (
+              <img class="interest-thumb" src={interest.img} alt="" loading="lazy" />
             )}
             {interest.note && <span class="interest-note">{interest.note}</span>}
           </div>
