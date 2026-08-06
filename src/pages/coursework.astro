@@ -49,12 +49,23 @@ const byScore = [...courses].sort((a, b) => total(b.scores) - total(a.scores));
       </details>
 
       <div class="sort-toggle" data-sort-toggle hidden>
-        <button type="button" class="sort-option is-on" data-sort="section">by section</button>
+        <button type="button" class="sort-option is-on" data-sort="score">by score</button>
         <span class="sort-slash">/</span>
-        <button type="button" class="sort-option" data-sort="score">by score</button>
+        <button type="button" class="sort-option" data-sort="section">by section</button>
       </div>
 
-      <div data-view="section">
+      <div data-view="score">
+        <div class="list-items">
+          {byScore.map((course) => (
+            <div class="course-line">
+              <span class="course-score">({formatTotal(total(course.scores))})</span>{' '}
+              <span class="item-name">{course.name}</span> — {course.comment}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div data-view="section" hidden>
         {GROUPS.map((group) => {
           const inGroup = courses.filter(group.match);
           if (!inGroup.length) return null;
@@ -72,17 +83,6 @@ const byScore = [...courses].sort((a, b) => total(b.scores) - total(a.scores));
             </div>
           );
         })}
-      </div>
-
-      <div data-view="score" hidden>
-        <div class="list-items">
-          {byScore.map((course) => (
-            <div class="course-line">
-              <span class="course-score">({formatTotal(total(course.scores))})</span>{' '}
-              <span class="item-name">{course.name}</span> — {course.comment}
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   </div>

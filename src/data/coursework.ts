@@ -150,7 +150,7 @@ export const courses: Course[] = [
     name: 'Corporate Finance',
     comment:
       'great professor, basically got reps with the work that I prepped for during recruiting',
-    important: false,
+    important: true,
     loved: false,
     scores: {
       interesting: 0.55,
