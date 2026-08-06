@@ -91,7 +91,7 @@ export const courses: Course[] = [
       teaching: 0.65,
       enjoyment: 0.75,
       applicability: 0.85,
-      surprise: 0.85,
+      surprise: 0.8,
     },
   },
   {
