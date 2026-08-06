@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { formatDate } from '../../lib/dates';
+import { readLabel } from '../../lib/read-time';
 
 const posts = (await getCollection('writing')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
@@ -20,7 +21,10 @@ const posts = (await getCollection('writing')).sort(
       <div class="entries">
         {posts.map((post) => (
           <div class="entry">
-            <div class="entry-date">{formatDate(post.data.date)}</div>
+            <div class="entry-date">
+              {formatDate(post.data.date)}
+              <span class="entry-aside">· {readLabel(post.body)}</span>
+            </div>
             <a href={`/writing/${post.id}`} class="entry-title">{post.data.title}</a>
           </div>
         ))}

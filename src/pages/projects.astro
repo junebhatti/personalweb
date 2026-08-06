@@ -43,12 +43,12 @@ const years: { year: string; projects: Project[] }[] = [
     </div>
 
     <div class="content">
-      <div class="section-label">Things I've built</div>
+      <div class="section-label section-label-lg">Things I've built</div>
 
       <div class="project-groups">
-        {current.length > 0 && (
-          <div class="project-group">
-            <div class="project-year">current</div>
+        <div class="project-group">
+          <div class="project-year">current</div>
+          {current.length > 0 && (
             <div class="entries project-entries">
               {current.map((project) => (
                 <div class="entry">
@@ -63,8 +63,8 @@ const years: { year: string; projects: Project[] }[] = [
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {years.map((group) => (
           <div class="project-group">

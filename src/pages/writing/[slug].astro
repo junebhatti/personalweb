@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { formatDate } from '../../lib/dates';
+import { readLabel } from '../../lib/read-time';
 
 export async function getStaticPaths() {
   const posts = await getCollection('writing');
@@ -19,7 +20,10 @@ const { Content } = await render(post);
   <div class="detail-page">
     <a href="/writing" class="back-link">&larr; back</a>
     <div class="detail">
-      <div class="post-date">{formatDate(post.data.date)}</div>
+      <div class="post-date">
+        {formatDate(post.data.date)}
+        <span class="entry-aside">· {readLabel(post.body)}</span>
+      </div>
       <div class="post-title">{post.data.title}</div>
       <div class="post-body">
         <Content />

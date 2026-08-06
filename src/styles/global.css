@@ -128,6 +128,11 @@ a:hover {
   color: #666;
 }
 
+/* A quiet suffix on a date line — the read time. */
+.entry-aside {
+  color: #aaa;
+}
+
 .entry-title {
   font-size: clamp(20px, 2.2vw, 26px);
   letter-spacing: -0.015em;
@@ -149,6 +154,10 @@ a:hover {
 
 /* --- Projects: one year heading per group, smaller entries --- */
 
+.section-label-lg {
+  font-size: 17px;
+}
+
 .project-groups {
   display: flex;
   flex-direction: column;
@@ -160,7 +169,10 @@ a:hover {
   color: #888;
   border-bottom: 1px solid #ddd;
   padding-bottom: 8px;
-  margin-bottom: 24px;
+}
+
+.project-year + .project-entries {
+  margin-top: 24px;
 }
 
 .project-entries {
@@ -271,6 +283,13 @@ a:hover {
   font-size: clamp(24px, 3vw, 36px);
   letter-spacing: -0.02em;
   line-height: 1.35;
+}
+
+/* For the visitor who wants to reach out but doesn't know about what. */
+.connect-hint {
+  font-size: 15px;
+  color: #888;
+  margin-top: 44px;
 }
 
 /* --- List pages (Coursework, Favorites) --- */
