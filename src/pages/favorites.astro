@@ -1,160 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-
-interface Item {
-  name: string;
-  /** Titles of works are italicised; people, bands and places are not. */
-  italic?: boolean;
-  note?: string;
-}
-
-interface Group {
-  label?: string;
-  aside?: string;
-  items: Item[];
-}
-
-interface Section {
-  label: string;
-  groups: Group[];
-}
-
-// Carried over from the old site, wording intact.
-const sections: Section[] = [
-  {
-    label: 'Books',
-    groups: [
-      {
-        items: [
-          {
-            name: 'Moby Dick',
-            italic: true,
-            note: "by Herman Melville — the most profound novel I've ever read, discussed it in an English class and fell in love. Billy Budd is also fantastic",
-          },
-          {
-            name: 'The Red Badge of Courage',
-            italic: true,
-            note: 'by Stephen Crane — my favorite war book',
-          },
-          {
-            name: 'Walden',
-            italic: true,
-            note: 'by Henry David Thoreau — everyone who cares about nature and craves ways to get away from society should read this',
-          },
-          {
-            name: 'The Royal Game',
-            italic: true,
-            note: 'by Stefan Zweig — an epic novella about chess, showcasing the power of the mind',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'Podcasts',
-    groups: [
-      {
-        items: [
-          {
-            name: 'Lex Fridman',
-            note: "— has some of the world's greatest thinkers on here, have really fallen in love with these recently",
-          },
-          {
-            name: 'The 7',
-            italic: true,
-            note: 'by the Washington Post — I start my day with seven headlines from around the world',
-          },
-          {
-            name: 'Hidden Voices',
-            note: '— a handful of these have been pretty insightful',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'Movies & Shows',
-    groups: [
-      {
-        label: 'Movies',
-        aside: 'I feel strongly about these…. @junaidb on letterboxd',
-        items: [
-          { name: 'City of God', italic: true, note: '— no words, just perfection' },
-          { name: 'Good Will Hunting', italic: true, note: '— insane debut' },
-          { name: 'The Motorcycle Diaries', italic: true },
-          {
-            name: 'The Departed',
-            italic: true,
-            note: '— ending scene + song make this a 10/10',
-          },
-          { name: 'Fantastic Mr. Fox', italic: true, note: "— be who you're meant to be" },
-          { name: 'Casablanca', italic: true },
-          { name: 'Miracle', italic: true, note: '— greatest sports movie imo' },
-        ],
-      },
-      {
-        label: 'Shows',
-        items: [
-          {
-            name: 'True Detective',
-            italic: true,
-            note: '(Season 1) — solidified my number #1 favorite actor as Matthew McConaughey',
-          },
-          {
-            name: 'Cowboy Bebop',
-            italic: true,
-            note: '— character writing, soundtrack, and animation are peak',
-          },
-          { name: 'Atlanta', italic: true, note: '— Donald Glover, the GOAT' },
-          { name: 'Bojack Horseman', italic: true, note: '— soft spot in my heart' },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'Music',
-    groups: [
-      {
-        items: [
-          { name: 'The Strokes', note: '— or anything Julian Casablancas' },
-          { name: 'Blue Coupe', italic: true, note: '— Twin Peaks' },
-          { name: 'Flimsier', italic: true, note: '— King Krule' },
-          { name: 'Us and Them', italic: true, note: '— Pink Floyd' },
-          { name: 'Song on the Beach', italic: true, note: '— Arcade Fire' },
-          { name: 'Shake the Frost', italic: true, note: '(Live) — Tyler Childers' },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'Restaurants',
-    groups: [
-      {
-        label: 'Los Angeles',
-        items: [
-          { name: 'Holbox', note: '— fish tacos' },
-          { name: 'Sun Nong Dan', note: '— korean' },
-          { name: 'Urth Cafe', note: '— european vibe' },
-          { name: 'Berenjak', note: '— persian' },
-        ],
-      },
-      {
-        label: 'New York City',
-        items: [
-          { name: 'Los Mariscos', note: '— fish tacos' },
-          { name: 'Pause Cafe', note: '— moroccan cafe' },
-          { name: "Jonny's Pizza", note: '— speaks for itself' },
-          { name: 'Mojo East', note: '— omakase' },
-          { name: 'Cafe Mogador', note: '— moroccan / middle eastern' },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'Blogs, videos, channels',
-    groups: [{ items: [{ name: 'Keith D' }] }],
-  },
-];
+import { categories } from '../data/favorites';
 ---
 
 <Base title="Favorites — Junaid Bhatti">
@@ -166,27 +12,71 @@ const sections: Section[] = [
     <div class="list-content">
       <div class="section-label">Some of my favorite media I've consumed</div>
 
-      {sections.map((section) => (
-        <div class="list-section">
-          <div class="subhead">{section.label}</div>
-          {section.groups.map((group) => (
+      <div class="switch" data-switch hidden>
+        {categories.map((category, i) => (
+          <>
+            {i > 0 && <span class="switch-slash">/</span>}
+            <button
+              type="button"
+              class={i === 0 ? 'switch-option is-on' : 'switch-option'}
+              data-category={category.key}
+            >{category.label}</button>
+          </>
+        ))}
+      </div>
+
+      {categories.map((category) => (
+        <div class="list-section" data-panel={category.key}>
+          <div class="subhead" data-panel-head>{category.label}</div>
+          {category.groups.map((group) => (
             <div class="list-group">
               {group.label && <div class="group-label">{group.label}</div>}
               {group.aside && <div class="group-aside">{group.aside}</div>}
-              <div class="list-items">
-                {group.items.map((item) => (
-                  <div>
-                    <span class={item.italic ? 'item-name italic' : 'item-name'}>
-                      {item.name}
-                    </span>
-                    {item.note && <> {item.note}</>}
+              <dl class="fav-list">
+                {group.entries.map((entry) => (
+                  <div class="fav-entry">
+                    <dt>
+                      <span class="fav-title">{entry.title}</span>
+                      {entry.by && <span class="fav-by">{entry.by}</span>}
+                    </dt>
+                    <dd>{entry.note}</dd>
                   </div>
                 ))}
-              </div>
+              </dl>
             </div>
           ))}
         </div>
       ))}
     </div>
   </div>
+
+  <script is:inline>
+    // Every category is in the page already; this only picks which one shows.
+    // Without JavaScript they all render, each under its own heading.
+    (function () {
+      const bar = document.querySelector('[data-switch]');
+      if (!bar) return;
+      const panels = Array.from(document.querySelectorAll('[data-panel]'));
+
+      function show(key) {
+        for (const panel of panels) {
+          panel.hidden = panel.dataset.panel !== key;
+          panel.querySelector('[data-panel-head]').hidden = true;
+        }
+        bar.querySelectorAll('[data-category]').forEach(function (el) {
+          el.classList.toggle('is-on', el.dataset.category === key);
+        });
+        history.replaceState(null, '', '#' + key);
+      }
+
+      bar.hidden = false;
+      bar.addEventListener('click', function (event) {
+        const button = event.target.closest('[data-category]');
+        if (button) show(button.dataset.category);
+      });
+
+      const wanted = location.hash.slice(1);
+      show(panels.some((p) => p.dataset.panel === wanted) ? wanted : panels[0].dataset.panel);
+    })();
+  </script>
 </Base>

@@ -276,6 +276,52 @@ a:hover {
   color: #888;
 }
 
+/* --- Favorites --- */
+
+.switch {
+  flex-wrap: wrap;
+}
+
+.fav-list {
+  margin: 0;
+}
+
+/* Title on the left, opinion on the right, so a run of entries reads as a
+   column of titles rather than 35 identical dash-joined sentences. */
+.fav-entry {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  padding: 9px 0;
+  border-top: 1px solid #eee;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.fav-entry:first-child {
+  border-top-color: #ddd;
+}
+
+.fav-entry dt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fav-entry dd {
+  margin: 0;
+  color: #555;
+}
+
+.fav-title {
+  color: #45539b;
+}
+
+.fav-by {
+  font-size: 14px;
+  color: #999;
+}
+
 /* A section can hold sub-groups — Movies and Shows, or a restaurant city. */
 .list-group + .list-group {
   margin-top: 20px;
@@ -360,7 +406,8 @@ a:hover {
   color: #111;
 }
 
-.sort-toggle {
+.sort-toggle,
+.switch {
   display: flex;
   align-items: baseline;
   gap: 8px;
@@ -371,7 +418,8 @@ a:hover {
 /* The one you can click looks like every other link on the site — blue with a
    rule under it. The one you are already on is plain ink with no rule, so it
    reads as a label rather than a target. */
-.sort-option {
+.sort-option,
+.switch-option {
   font: inherit;
   font-size: 15px;
   color: #45539b;
@@ -383,17 +431,20 @@ a:hover {
   transition: color 120ms;
 }
 
-.sort-option:hover {
+.sort-option:hover,
+.switch-option:hover {
   color: #1a1aff;
 }
 
-.sort-option.is-on {
+.sort-option.is-on,
+.switch-option.is-on {
   color: #111;
   border-bottom-color: transparent;
   cursor: default;
 }
 
-.sort-slash {
+.sort-slash,
+.switch-slash {
   color: #ddd;
 }
 
@@ -573,6 +624,12 @@ a:hover {
   .scoring-item {
     grid-template-columns: 104px 1fr 24px;
     gap: 10px;
+  }
+
+  .fav-entry {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    padding: 10px 0;
   }
 }
 
