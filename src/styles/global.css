@@ -276,210 +276,51 @@ a:hover {
   color: #888;
 }
 
-/* --- Coursework ranking --- */
+/* --- Coursework --- */
 
-.controls {
+/* The view wrapper is one flex child of .list-content, so it has to space its
+   own sections the way .list-content would have. */
+[data-view] {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 18px 0 4px;
-  border-top: 1px solid #111;
-  border-bottom: 1px solid #ddd;
+  gap: 36px;
 }
 
-.control-row {
+.sort-toggle {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: baseline;
   gap: 8px;
-  padding-bottom: 14px;
+  font-size: 15px;
+  margin-bottom: 4px;
 }
 
-.control-label {
-  font-size: 14px;
-  color: #888;
-  min-width: 68px;
-}
-
-.control-value {
-  font-size: 14px;
-  color: #666;
-  font-variant-numeric: tabular-nums;
-}
-
-.control-note {
-  font-size: 14px;
-  color: #888;
-}
-
-.chip {
+.sort-option {
   font: inherit;
   font-size: 15px;
   color: #45539b;
   background: none;
-  border: 1px solid #ddd;
-  padding: 5px 12px;
+  border: 0;
+  padding: 0;
   cursor: pointer;
-  transition: color 120ms, border-color 120ms;
+  transition: color 120ms;
 }
 
-.chip:hover {
+.sort-option:hover {
   color: #1a1aff;
-  border-color: #bbb;
 }
 
-.chip.is-on {
-  color: #fff;
-  background: #45539b;
-  border-color: #45539b;
-}
-
-.chip-action {
-  border-color: #111;
+.sort-option.is-on {
   color: #111;
+  cursor: default;
+}
+
+.sort-slash {
+  color: #ddd;
 }
 
 .course-score {
   color: #888;
   font-variant-numeric: tabular-nums;
-}
-
-.signin {
-  padding-bottom: 14px;
-}
-
-.signin-label {
-  font-size: 14px;
-  color: #888;
-  margin-bottom: 8px;
-}
-
-.signin-fields {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.signin input {
-  font: inherit;
-  font-size: 15px;
-  color: #111;
-  background: #fff;
-  border: 1px solid #ddd;
-  padding: 5px 10px;
-  min-width: 180px;
-}
-
-.signin input:focus {
-  outline: none;
-  border-color: #45539b;
-}
-
-.legend {
-  font-size: 15px;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 16px;
-}
-
-.legend summary {
-  color: #45539b;
-  cursor: pointer;
-  padding: 2px 0;
-}
-
-.legend summary:hover {
-  color: #1a1aff;
-}
-
-.legend-body {
-  max-width: 640px;
-  padding-top: 14px;
-}
-
-.legend-intro {
-  margin: 0 0 16px;
-  line-height: 1.55;
-  color: #555;
-}
-
-.legend-list {
-  margin: 0;
-}
-
-.legend-item {
-  display: grid;
-  grid-template-columns: 132px 1fr;
-  gap: 16px;
-  margin-bottom: 8px;
-  line-height: 1.5;
-}
-
-.legend-item dt {
-  color: #111;
-}
-
-.legend-item dd {
-  margin: 0;
-  color: #555;
-}
-
-.legend-anchors {
-  margin: 16px 0 0;
-  color: #888;
-  line-height: 1.5;
-}
-
-.legend-anchor {
-  color: #111;
-  font-variant-numeric: tabular-nums;
-}
-
-.legend-sep {
-  color: #ccc;
-}
-
-.ranker {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 12px 0 4px;
-  padding: 14px 16px;
-  background: #f6f6f4;
-  max-width: 460px;
-}
-
-.ranker-row {
-  display: grid;
-  grid-template-columns: 108px 1fr 42px;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-}
-
-.ranker-label {
-  color: #666;
-}
-
-.ranker-value {
-  color: #111;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-input[type='range'] {
-  accent-color: #45539b;
-  width: 100%;
-  min-width: 120px;
-}
-
-.control-row input[type='range'] {
-  width: 200px;
-  flex: 0 0 auto;
-}
-
-.empty-note {
-  font-size: 17px;
-  color: #888;
 }
 
 /* --- Interests --- */
@@ -648,17 +489,6 @@ input[type='range'] {
   .note-group {
     grid-template-columns: 1fr;
     gap: 12px;
-  }
-
-  .legend-item {
-    grid-template-columns: 1fr;
-    gap: 2px;
-    margin-bottom: 14px;
-  }
-
-  .ranker-row {
-    grid-template-columns: 92px 1fr 38px;
-    gap: 8px;
   }
 }
 

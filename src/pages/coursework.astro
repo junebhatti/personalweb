@@ -1,32 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import {
-  buildCourses,
-  DIMENSIONS,
-  SCALE_ANCHORS,
-  SCORE_MAX,
-  total,
-  formatTotal,
-  type Scores,
-} from '../data/coursework';
-import { fetchScores, isSupabaseConfigured } from '../lib/supabase';
-
-type Course = ReturnType<typeof buildCourses>[number];
-
-// Bake the current Supabase values into the HTML so the page is right before
-// any JavaScript runs. If the project is unreachable at build time we fall
-// back to the JSON seed rather than failing the build.
-let overrides: Record<string, Partial<Scores>> = {};
-if (isSupabaseConfigured) {
-  const rows = await fetchScores();
-  if (rows) {
-    overrides = Object.fromEntries(rows.map((row) => [row.course_id, row.scores ?? {}]));
-  } else {
-    console.warn('[coursework] Supabase unreachable at build time — using seed scores');
-  }
-}
-
-const courses = buildCourses(overrides);
+import { courses, total, formatTotal, type Course } from '../data/coursework';
 
 const GROUPS = [
   { key: 'important', label: 'Important', match: (c: Course) => c.important },
@@ -34,12 +8,7 @@ const GROUPS = [
   { key: 'other', label: 'Other', match: (c: Course) => !c.important && !c.loved },
 ];
 
-const clientData = {
-  defaults: Object.fromEntries(courses.map((c) => [c.id, c.scores])),
-  dimensions: DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })),
-  scoreMax: SCORE_MAX,
-  supabaseEnabled: isSupabaseConfigured,
-};
+const byScore = [...courses].sort((a, b) => total(b.scores) - total(a.scores));
 ---
 
 <Base title="Coursework — Junaid Bhatti">
@@ -51,496 +20,66 @@ const clientData = {
     <div class="list-content">
       <div class="section-label">Coursework</div>
 
-      <div class="controls" data-controls hidden>
-        <div class="control-row">
-          <span class="control-label">Show</span>
-          <button type="button" class="chip" data-filter="important">Important</button>
-          <button type="button" class="chip" data-filter="loved">Loved</button>
-          <button type="button" class="chip" data-filter="other">Other</button>
-        </div>
-
-        <div class="control-row">
-          <span class="control-label">Sort</span>
-          <button type="button" class="chip is-on" data-sort="section">By section</button>
-          <button type="button" class="chip" data-sort="score">By score</button>
-        </div>
-
-        <div class="control-row">
-          <label class="control-label" for="min-score">Min score</label>
-          <input type="range" id="min-score" min="0" max={SCORE_MAX} step="0.1" value="0" />
-          <span class="control-value" data-min-score-value>0.0</span>
-        </div>
-
-        <div class="control-row" data-editor-row hidden>
-          <button type="button" class="chip chip-action" data-rank-toggle>Rank them</button>
-          <button type="button" class="chip" data-save hidden>Save</button>
-          <button type="button" class="chip" data-copy hidden>Copy JSON</button>
-          <button type="button" class="chip" data-reset hidden>Reset</button>
-          <button type="button" class="chip" data-signout hidden>Sign out</button>
-          <span class="control-note" data-status role="status" aria-live="polite"></span>
-        </div>
-
-        <form class="signin" data-signin hidden>
-          <div class="signin-label">Sign in to save for everyone</div>
-          <div class="signin-fields">
-            <input type="email" name="email" placeholder="email" autocomplete="username" required />
-            <input
-              type="password"
-              name="password"
-              placeholder="password"
-              autocomplete="current-password"
-              required
-            />
-            <button type="submit" class="chip chip-action">Sign in</button>
-            <button type="button" class="chip" data-signin-cancel>Cancel</button>
-          </div>
-        </form>
+      <div class="sort-toggle" data-sort-toggle hidden>
+        <button type="button" class="sort-option is-on" data-sort="section">by section</button>
+        <span class="sort-slash">/</span>
+        <button type="button" class="sort-option" data-sort="score">by score</button>
       </div>
 
-      <details class="legend">
-        <summary>How the score works</summary>
-        <div class="legend-body">
-          <p class="legend-intro">
-            Every course is scored 0 to 1 on each of the {DIMENSIONS.length} dimensions below.
-            The number in front of a course is their average, stretched onto a 0–{SCORE_MAX}
-            scale — so it means the same thing even if a dimension is added or dropped.
-            All of them point the same way: higher is better.
-          </p>
-
-          <dl class="legend-list">
-            {DIMENSIONS.map((d) => (
-              <div class="legend-item">
-                <dt>{d.label}</dt>
-                <dd>{d.definition}</dd>
-              </div>
-            ))}
-          </dl>
-
-          <p class="legend-anchors">
-            {SCALE_ANCHORS.map((a, i) => (
-              <>
-                {i > 0 && <span class="legend-sep"> · </span>}
-                <span class="legend-anchor">{a.value}</span> {a.meaning}
-              </>
-            ))}
-          </p>
-        </div>
-      </details>
-
-      {GROUPS.map((group) => {
-        const inGroup = courses.filter(group.match);
-        return (
-          <div class="list-section" data-group={group.key} hidden={inGroup.length === 0}>
-            <div class="subhead" data-group-head>{group.label}</div>
-            <div class="list-items">
-              {inGroup.map((course) => (
-                <div
-                  class="course"
-                  data-course={course.id}
-                  data-important={String(course.important)}
-                  data-loved={String(course.loved)}
-                  data-total={total(course.scores).toFixed(4)}
-                >
+      <div data-view="section">
+        {GROUPS.map((group) => {
+          const inGroup = courses.filter(group.match);
+          if (!inGroup.length) return null;
+          return (
+            <div class="list-section">
+              <div class="subhead">{group.label}</div>
+              <div class="list-items">
+                {inGroup.map((course) => (
                   <div class="course-line">
-                    <span class="course-score" data-score>({formatTotal(total(course.scores))})</span>{' '}
+                    <span class="course-score">({formatTotal(total(course.scores))})</span>{' '}
                     <span class="item-name">{course.name}</span> — {course.comment}
                   </div>
-                  <div class="ranker" data-ranker hidden>
-                    {DIMENSIONS.map((d) => (
-                      <label class="ranker-row">
-                        <span class="ranker-label" title={d.definition}>{d.label}</span>
-                        <input
-                          type="range"
-                          min="0"
-                          max="1"
-                          step="0.05"
-                          value={course.scores[d.key]}
-                          data-dim={d.key}
-                          aria-label={`${d.label} — ${d.definition}`}
-                        />
-                        <span class="ranker-value" data-dim-value={d.key}>
-                          {course.scores[d.key].toFixed(2)}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
 
-      <div class="empty-note" data-empty hidden>Nothing matches those filters.</div>
+      <div data-view="score" hidden>
+        <div class="list-items">
+          {byScore.map((course) => (
+            <div class="course-line">
+              <span class="course-score">({formatTotal(total(course.scores))})</span>{' '}
+              <span class="item-name">{course.name}</span> — {course.comment}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   </div>
 
-  <script type="application/json" id="coursework-data" set:html={JSON.stringify(clientData)} />
+  <script is:inline>
+    // Both orderings are already in the page; this only swaps which one shows.
+    (function () {
+      const toggle = document.querySelector('[data-sort-toggle]');
+      const views = {
+        section: document.querySelector('[data-view="section"]'),
+        score: document.querySelector('[data-view="score"]'),
+      };
+      if (!toggle) return;
+      toggle.hidden = false;
 
-  <script>
-    import {
-      fetchScores,
-      hasStoredSession,
-      isSupabaseConfigured,
-      loadClient,
-      SCORES_TABLE,
-    } from '../lib/supabase';
-
-    const config = JSON.parse(document.getElementById('coursework-data')!.textContent!);
-    const { defaults, dimensions, scoreMax, supabaseEnabled } = config;
-
-    const DRAFT_KEY = 'coursework-draft-v1';
-    const DEV_ENDPOINT = '/api/coursework-scores';
-
-    const controls = document.querySelector('[data-controls]') as HTMLElement;
-    const cards = Array.from(document.querySelectorAll('[data-course]')) as HTMLElement[];
-    const groups = Array.from(document.querySelectorAll('[data-group]')) as HTMLElement[];
-    const statusEl = document.querySelector('[data-status]') as HTMLElement;
-    const emptyEl = document.querySelector('[data-empty]') as HTMLElement;
-    const minInput = document.getElementById('min-score') as HTMLInputElement;
-    const minValueEl = document.querySelector('[data-min-score-value]') as HTMLElement;
-    const signinForm = document.querySelector('[data-signin]') as HTMLFormElement;
-    const signoutBtn = document.querySelector('[data-signout]') as HTMLElement;
-    const editorRow = document.querySelector('[data-editor-row]') as HTMLElement;
-
-    const useSupabase = supabaseEnabled && isSupabaseConfigured;
-    const maxWeight = dimensions.reduce((s: number, d: any) => s + d.weight, 0);
-
-    const state = {
-      filters: new Set<string>(),
-      sort: 'section',
-      min: 0,
-      ranking: false,
-      dirty: false,
-      signedIn: false,
-      scores: loadDraft(),
-    };
-
-    function loadDraft() {
-      const base = JSON.parse(JSON.stringify(defaults));
-      try {
-        const saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
-        for (const id of Object.keys(base)) {
-          if (saved[id]) Object.assign(base[id], saved[id]);
-        }
-      } catch {}
-      return base;
-    }
-
-    function stashDraft() {
-      try {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify(state.scores));
-      } catch {}
-    }
-
-    function clearDraft() {
-      try {
-        localStorage.removeItem(DRAFT_KEY);
-      } catch {}
-    }
-
-    function totalFor(id: string) {
-      const s = state.scores[id] || {};
-      const weighted = dimensions.reduce(
-        (sum: number, d: any) => sum + (s[d.key] || 0) * d.weight,
-        0
-      );
-      return maxWeight ? (weighted / maxWeight) * scoreMax : 0;
-    }
-
-    function status(text: string) {
-      if (statusEl) statusEl.textContent = text;
-    }
-
-    /**
-     * Visitors get a clean page: filters and sorting, no editing UI and no
-     * sign-in prompt. The editor appears only once you are signed in — or
-     * always when there is no Supabase project, since then it is the local
-     * authoring tool. Add ?edit to the URL to reveal the sign-in form.
-     */
-    function applyEditorVisibility() {
-      const canEdit = !useSupabase || state.signedIn;
-      editorRow.hidden = !canEdit;
-      if (!canEdit && state.ranking) {
-        state.ranking = false;
-        render();
-      }
-    }
-
-    function syncSliders() {
-      for (const card of cards) {
-        const id = card.dataset.course!;
-        card.querySelectorAll<HTMLInputElement>('[data-dim]').forEach((input) => {
-          const dim = input.dataset.dim!;
-          const value = state.scores[id][dim];
-          input.value = String(value);
-          card.querySelector(`[data-dim-value="${dim}"]`)!.textContent = Number(value).toFixed(2);
+      toggle.addEventListener('click', function (event) {
+        const button = event.target.closest('[data-sort]');
+        if (!button) return;
+        const choice = button.dataset.sort;
+        views.section.hidden = choice !== 'section';
+        views.score.hidden = choice !== 'score';
+        toggle.querySelectorAll('[data-sort]').forEach(function (el) {
+          el.classList.toggle('is-on', el === button);
         });
-      }
-    }
-
-    /** Pull the current values so a stale build never shows stale numbers. */
-    async function refreshFromSupabase() {
-      if (!useSupabase) return;
-      const data = await fetchScores();
-      if (!data) return;
-      let changed = false;
-      for (const row of data) {
-        const local = state.scores[row.course_id];
-        if (!local || !row.scores) continue;
-        for (const [dim, value] of Object.entries(row.scores)) {
-          if (typeof value === 'number' && local[dim] !== value) {
-            local[dim] = value;
-            changed = true;
-          }
-        }
-      }
-      if (changed && !state.dirty) {
-        syncSliders();
-        render();
-      }
-    }
-
-    async function save() {
-      if (useSupabase) {
-        if (!state.signedIn) {
-          signinForm.hidden = false;
-          status('Sign in to save.');
-          return;
-        }
-        status('Saving…');
-        const rows = Object.entries(state.scores).map(([course_id, scores]) => ({
-          course_id,
-          scores,
-        }));
-        const client = await loadClient();
-        const { error } = await client
-          .from(SCORES_TABLE)
-          .upsert(rows, { onConflict: 'course_id' });
-        if (error) {
-          status(`Save failed: ${error.message}`);
-          return;
-        }
-        state.dirty = false;
-        clearDraft();
-        status('Saved — live for everyone.');
-        return;
-      }
-
-      // No Supabase configured: write the JSON file via the dev server.
-      status('Saving…');
-      try {
-        const response = await fetch(DEV_ENDPOINT, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(state.scores),
-        });
-        const result = await response.json();
-        if (!response.ok || !result.ok) throw new Error(result.error || 'save failed');
-        state.dirty = false;
-        clearDraft();
-        status('Saved to coursework-scores.json — commit it to publish.');
-      } catch {
-        status('Saved in this browser only. Use Copy JSON.');
-      }
-    }
-
-    function render() {
-      let visible = 0;
-
-      for (const card of cards) {
-        const id = card.dataset.course!;
-        const value = totalFor(id);
-        card.dataset.total = value.toFixed(4);
-        card.querySelector('[data-score]')!.textContent = `(${value.toFixed(1)})`;
-
-        const tags: string[] = [];
-        if (card.dataset.important === 'true') tags.push('important');
-        if (card.dataset.loved === 'true') tags.push('loved');
-        if (!tags.length) tags.push('other');
-
-        const show =
-          (state.filters.size === 0 || tags.some((t) => state.filters.has(t))) &&
-          value >= state.min - 1e-9;
-
-        card.hidden = !show;
-        if (show) visible++;
-
-        const ranker = card.querySelector('[data-ranker]') as HTMLElement;
-        if (ranker) ranker.hidden = !state.ranking;
-      }
-
-      if (state.sort === 'score') {
-        const container = groups[0].querySelector('.list-items')!;
-        const ordered = cards
-          .slice()
-          .sort((a, b) => Number(b.dataset.total) - Number(a.dataset.total));
-        for (const card of ordered) container.appendChild(card);
-        groups[0].hidden = ordered.every((el) => el.hidden);
-        (groups[0].querySelector('[data-group-head]') as HTMLElement).hidden = true;
-        for (const group of groups.slice(1)) group.hidden = true;
-      } else {
-        for (const card of cards) {
-          const home = document.querySelector(`[data-group="${card.dataset.home}"] .list-items`);
-          if (home) home.appendChild(card);
-        }
-        for (const group of groups) {
-          const items = Array.from(group.querySelectorAll('[data-course]')) as HTMLElement[];
-          group.hidden = items.length === 0 || items.every((el) => el.hidden);
-          (group.querySelector('[data-group-head]') as HTMLElement).hidden = false;
-        }
-      }
-
-      if (emptyEl) emptyEl.hidden = visible > 0;
-    }
-
-    for (const card of cards) {
-      const group = card.closest('[data-group]') as HTMLElement | null;
-      card.dataset.home = group ? group.dataset.group! : 'other';
-    }
-
-    controls.hidden = false;
-
-    controls.addEventListener('click', (event) => {
-      const button = (event.target as HTMLElement).closest('button');
-      if (!button || button.type === 'submit') return;
-
-      if (button.dataset.filter) {
-        const key = button.dataset.filter;
-        if (state.filters.has(key)) state.filters.delete(key);
-        else state.filters.add(key);
-        button.classList.toggle('is-on', state.filters.has(key));
-        render();
-      }
-
-      if (button.dataset.sort) {
-        state.sort = button.dataset.sort;
-        controls
-          .querySelectorAll('[data-sort]')
-          .forEach((el) => el.classList.toggle('is-on', el === button));
-        render();
-      }
-
-      if (button.hasAttribute('data-rank-toggle')) {
-        state.ranking = !state.ranking;
-        button.classList.toggle('is-on', state.ranking);
-        button.textContent = state.ranking ? 'Done ranking' : 'Rank them';
-        for (const attr of ['data-save', 'data-copy', 'data-reset']) {
-          (controls.querySelector(`[${attr}]`) as HTMLElement).hidden = !state.ranking;
-        }
-        signoutBtn.hidden = !(state.ranking && state.signedIn);
-        if (state.ranking && useSupabase && !state.signedIn) signinForm.hidden = false;
-        if (!state.ranking) signinForm.hidden = true;
-        status(state.ranking ? 'Drag a slider, then Save.' : '');
-        render();
-      }
-
-      if (button.hasAttribute('data-save')) save();
-
-      if (button.hasAttribute('data-copy')) {
-        navigator.clipboard.writeText(JSON.stringify(state.scores, null, 2)).then(
-          () => status('Copied — paste into src/data/coursework-scores.json'),
-          () => status('Copy failed')
-        );
-      }
-
-      if (button.hasAttribute('data-reset')) {
-        state.scores = JSON.parse(JSON.stringify(defaults));
-        clearDraft();
-        syncSliders();
-        state.dirty = false;
-        status('Back to the saved scores.');
-        render();
-      }
-
-      if (button.hasAttribute('data-signin-cancel')) {
-        signinForm.hidden = true;
-        status('');
-      }
-
-      if (button.hasAttribute('data-signout')) {
-        loadClient()
-          .then((client) => client.auth.signOut())
-          .then(() => {
-            state.signedIn = false;
-            state.ranking = false;
-            signoutBtn.hidden = true;
-            signinForm.hidden = true;
-            applyEditorVisibility();
-            status('Signed out.');
-            render();
-          });
-      }
-    });
-
-    signinForm?.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      if (!useSupabase) return;
-      const data = new FormData(signinForm);
-      status('Signing in…');
-      const client = await loadClient();
-      const { error } = await client.auth.signInWithPassword({
-        email: String(data.get('email')),
-        password: String(data.get('password')),
       });
-      if (error) {
-        status(`Sign-in failed: ${error.message}`);
-        return;
-      }
-      signinForm.reset();
-      signinForm.hidden = true;
-      state.signedIn = true;
-      applyEditorVisibility();
-      signoutBtn.hidden = !state.ranking;
-      status('Signed in on this device — Save publishes for everyone.');
-    });
-
-    controls.addEventListener('input', (event) => {
-      if (event.target !== minInput) return;
-      state.min = Number(minInput.value);
-      minValueEl.textContent = state.min.toFixed(1);
-      render();
-    });
-
-    document.addEventListener('input', (event) => {
-      const input = event.target as HTMLInputElement;
-      if (!input.dataset || !input.dataset.dim) return;
-      const card = input.closest('[data-course]') as HTMLElement | null;
-      if (!card) return;
-      const dim = input.dataset.dim;
-      state.scores[card.dataset.course!][dim] = Number(input.value);
-      card.querySelector(`[data-dim-value="${dim}"]`)!.textContent = Number(input.value).toFixed(2);
-      state.dirty = true;
-      stashDraft();
-      status('Unsaved changes.');
-      render();
-    });
-
-    window.addEventListener('beforeunload', (event) => {
-      if (!state.dirty) return;
-      event.preventDefault();
-      event.returnValue = '';
-    });
-
-    if (useSupabase) {
-      // Checking localStorage avoids pulling in the SDK just to discover that
-      // a visitor is not signed in. The session refreshes itself, so signing in
-      // on a device is a one-time thing, not something you do on every visit.
-      if (hasStoredSession()) {
-        loadClient()
-          .then((client) => client.auth.getSession())
-          .then(({ data }) => {
-            state.signedIn = Boolean(data.session);
-            signoutBtn.hidden = !(state.ranking && state.signedIn);
-            applyEditorVisibility();
-          });
-      } else if (new URLSearchParams(location.search).has('edit')) {
-        signinForm.hidden = false;
-      }
-      refreshFromSupabase();
-    }
-
-    applyEditorVisibility();
-    render();
+    })();
   </script>
 </Base>

@@ -45,49 +45,28 @@ own page files.
 
 ## Course rankings
 
-Each course on `/coursework` is scored 0–1 across the dimensions defined in
-`src/data/coursework.ts`, shown as a single 0–4 number. Editing the dimension
-list there updates the sliders, the legend, and the score together — no other
-file needs to change.
+Courses live in `src/data/coursework.ts` — one object each, holding the name,
+the comment, whether it counts as important or loved, and a 0–1 score on every
+dimension. Adding a course is appending to that list; nothing else to touch.
 
-`src/data/coursework-scores.json` holds the seed values. Where the live values
-come from depends on whether Supabase is configured:
+Each dimension is defined in `DIMENSIONS` at the top of the same file, with a
+one-line explanation of what it means and a weight. They are not equal: the
+four full-weight ones (interesting, teaching, enjoyment, durability) describe
+whether the class was good and whether it lasted, and the three half-weight
+ones (applicability, rigor, surprise) qualify that without being able to carry
+a course on their own.
 
-| Setup | Ranking in the browser saves to | Visible to |
-|---|---|---|
-| No Supabase | the JSON file (dev server only) | you, after committing |
-| Supabase | the database, immediately | everyone, at once |
+The number in front of a course is the weighted average on a 0–5 scale. Straight
+1s come out at exactly 5 whatever the weights sum to, so adding or dropping a
+dimension does not shift what a 4.1 means.
 
-### Connecting Supabase
+Every dimension points the same way — higher is better. That is why one is
+rigor rather than difficulty: a class that was merely laborious should not
+outrank one that made you think.
 
-1. Run `supabase/schema.sql` in the Supabase SQL editor.
-2. Create your own user under Authentication → Users, then **turn off public
-   sign-ups** (Authentication → Sign In / Providers). That switch is the entire
-   security boundary — with it on, a stranger could register and rewrite your
-   rankings.
-3. Copy `.env.example` to `.env` and fill in the project URL and anon key from
-   Project Settings → API. Add the same two variables in Vercel.
-
-Both values are meant to be public; row-level security is what protects writes.
-The `service_role` key must never go in either file.
-
-### What visitors see
-
-Nothing about editing. No sign-in, no account, no ranking controls — just the
-scored list with the filters, the sort, and the legend. The page is public and
-shareable as-is.
-
-The editor appears only when you are signed in. To sign in, visit
-`/coursework?edit`. The session persists and refreshes itself, so that is a
-one-time step per device rather than something you do on each visit.
-
-Reading uses a plain REST call, so the ~220 kB Supabase SDK is never sent to
-visitors; it loads on demand only when you sign in or save. The coursework page
-ships about 8 kB of JavaScript to everyone else.
-
-The build bakes current values into the HTML, and the page re-checks the
-database on load, so a stale deploy never shows stale numbers. If Supabase is
-unreachable the seed JSON is used instead and the build still succeeds.
+The page renders both orderings and a small inline script swaps between them,
+so it stays static and ships no bundled JavaScript. Without JS it shows the
+section view.
 
 ## Layout
 
