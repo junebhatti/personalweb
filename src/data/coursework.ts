@@ -89,7 +89,7 @@ export const courses: Course[] = [
     scores: {
       interesting: 0.8,
       teaching: 0.65,
-      enjoyment: 0.7,
+      enjoyment: 0.75,
       applicability: 0.85,
       surprise: 0.85,
     },
@@ -113,10 +113,10 @@ export const courses: Course[] = [
     important: false,
     loved: true,
     scores: {
-      interesting: 0.85,
+      interesting: 0.7,
       teaching: 0.8,
       enjoyment: 0.8,
-      applicability: 0.5,
+      applicability: 0.6,
       surprise: 0.3,
     },
   },
@@ -143,7 +143,7 @@ export const courses: Course[] = [
       teaching: 0.5,
       enjoyment: 0.4,
       applicability: 0.8,
-      surprise: 0.25,
+      surprise: 0.5,
     },
   },
   {
