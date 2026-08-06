@@ -16,7 +16,7 @@ export const interests: Interest[] = [
   { word: 'Reading novels', img: '/interests/reading.jpg' },
   { word: 'Journaling', img: '/interests/journaling.jpg' },
   { word: 'Writing', img: '/interests/writing.jpg' },
-  { word: 'Philosophy', img: '/interests/philosophy.jpg' },
+  { word: 'Philosophy (life, religion, ethics)', img: '/interests/philosophy.jpg' },
   { word: 'Math', img: '/interests/math.jpg' },
   { word: 'Food + Restaurants + Coffee (Beli)', img: '/interests/food.jpg' },
   { word: 'Liverpool FC', img: '/interests/liverpool.jpg' },
