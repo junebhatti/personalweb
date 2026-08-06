@@ -4,31 +4,17 @@ Roughly in priority order.
 
 ## 1. Obsidian → notes
 
-Publish short thoughts by writing them in Obsidian, without touching the repo
-by hand. A single "quick thoughts" / brain-dump folder in the vault is the
-source; everything else in the vault stays private.
+Pipeline is built — `npm run notes` copies flagged notes from
+`Writing/Brain Dump` into the site. See the README. What is left:
 
-- [ ] Pick the vault folder that feeds `/notes`
-- [ ] Decide how it syncs — **open question**, see below
-- [ ] Add `date` to each note (an Obsidian template can do this automatically)
-- [ ] Add a `publish: true` flag so only flagged notes go public
-- [ ] Handle Obsidian-only syntax before it reaches the site: `[[wikilinks]]`,
-      `![[embeds]]`, `#tags`, and callouts do not render as Markdown and will
-      show up as literal text
-- [ ] Replace the four placeholder notes currently in `src/content/notes/`
-
-**Open question — git or Supabase?** Both were discussed; they are different
-trades, and the site currently has neither.
-
-- *Git* (Obsidian Git plugin commits the folder into `src/content/notes/`):
-  no infrastructure, no keys, no database. A note is live about a minute after
-  it syncs. Notes are already Markdown with frontmatter, which is exactly what
-  the site reads — nothing needs converting.
-- *Supabase*: lets notes appear without a rebuild and could be written from
-  anywhere, but reintroduces a database, keys, and a sign-in that was
-  deliberately removed to keep the site a shareable static portfolio.
-
-Git looks like the better fit unless posting from a phone matters.
+- [ ] Decide which notes to publish and add `publish: true` to them
+- [ ] Sort out the four already-published essays sitting in Brain Dump
+      (be courageous / ramadan / judging religion / stop optimizing) — they are
+      live under `/writing`, so publishing them as notes would duplicate them
+- [ ] Delete the four placeholder notes in `src/content/notes/` once real ones exist
+- [ ] Install the Templater template so new notes get frontmatter automatically
+- [ ] Set up the launchd agent or cron job if the manual `npm run notes` gets old
+- [ ] `is it more noble to question or to accept.md` is empty — write it or bin it
 
 ## 2. Projects
 

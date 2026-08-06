@@ -43,6 +43,53 @@ Projects and videos are still hardcoded arrays at the top of `src/pages/projects
 `src/pages/videos.astro`. Coursework, favorites, and interests are written directly into their
 own page files.
 
+## Notes from Obsidian
+
+Short notes are written in the vault at
+`~/Documents/Obsidian/Junaid/junaidb/Writing/Brain Dump` and copied into
+`src/content/notes/` by a sync script:
+
+```bash
+npm run notes
+```
+
+**Publishing is opt-in.** A note ships only if its frontmatter says
+`publish: true`. That folder is a drafting space — it holds unfinished
+fragments and drafts of pieces already published under `/writing` — so nothing
+leaves the vault unless it is marked. Running the script with nothing flagged
+publishes nothing.
+
+```markdown
+---
+created: 2026-03-14
+publish: true
+---
+
+The note text.
+```
+
+The date comes from `date`, then `created`, then the file's creation time.
+The slug comes from the filename. On the way out the script strips the things
+that are Obsidian-only and would otherwise render as literal text: `%%comments%%`,
+`![[embeds]]`, callout headers, and `[[wikilinks]]` (which become their label).
+
+Notes it writes carry `source: obsidian`. It only ever deletes files carrying
+that marker, so a note written by hand in `src/content/notes/` is safe. Setting
+`publish: false` again removes the note from the site on the next run.
+
+`scripts/quick-thought.template.md` is a Templater template that stamps
+`created` and `publish: false` onto new notes in that folder.
+
+### Making it automatic
+
+The script only copies files; the site updates when the change is committed and
+pushed. To do the whole thing on a schedule, run this from a launchd agent or a
+cron job:
+
+```bash
+npm run notes && git add src/content/notes && git diff --cached --quiet || git commit -m "Sync notes" && git push
+```
+
 ## Course rankings
 
 Courses live in `src/data/coursework.ts` — one object each, holding the name,
