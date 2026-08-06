@@ -344,6 +344,37 @@ a:hover {
   font-variant-numeric: tabular-nums;
 }
 
+.signin {
+  padding-bottom: 14px;
+}
+
+.signin-label {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.signin-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.signin input {
+  font: inherit;
+  font-size: 15px;
+  color: #111;
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 5px 10px;
+  min-width: 180px;
+}
+
+.signin input:focus {
+  outline: none;
+  border-color: #45539b;
+}
+
 .legend {
   font-size: 15px;
   border-bottom: 1px solid #ddd;

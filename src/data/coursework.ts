@@ -189,17 +189,23 @@ export interface Course extends CourseMeta {
 }
 
 /** A dimension with no saved value yet sits at the midpoint rather than zero. */
-function scoresFor(id: string): Scores {
-  const saved = (savedScores as Record<string, Partial<Scores>>)[id] ?? {};
+export function scoresFor(id: string, overrides: Record<string, Partial<Scores>> = {}): Scores {
+  const seed = (savedScores as Record<string, Partial<Scores>>)[id] ?? {};
+  const live = overrides[id] ?? {};
   return Object.fromEntries(
-    DIMENSIONS.map((d) => [d.key, saved[d.key] ?? 0.5])
+    DIMENSIONS.map((d) => [d.key, live[d.key] ?? seed[d.key] ?? 0.5])
   ) as Scores;
 }
 
-export const courses: Course[] = COURSES.map((course) => ({
-  ...course,
-  scores: scoresFor(course.id),
-}));
+/** The JSON file is the seed; Supabase, when configured, wins over it. */
+export function buildCourses(overrides: Record<string, Partial<Scores>> = {}): Course[] {
+  return COURSES.map((course) => ({
+    ...course,
+    scores: scoresFor(course.id, overrides),
+  }));
+}
+
+export const courses: Course[] = buildCourses();
 
 /** Weighted score across every dimension, normalised to 0 through 4. */
 export function total(scores: Scores): number {

@@ -1,25 +1,46 @@
 ---
 import Base from '../layouts/Base.astro';
 import {
-  courses,
+  buildCourses,
   DIMENSIONS,
   SCALE_ANCHORS,
   SCORE_MAX,
   total,
   formatTotal,
+  type Scores,
 } from '../data/coursework';
+import { getSupabase, isSupabaseConfigured, SCORES_TABLE } from '../lib/supabase';
 
-type Course = (typeof courses)[number];
+type Course = ReturnType<typeof buildCourses>[number];
 
-// Rendered in section order; the client re-sorts and filters from the same markup.
+// Bake the current Supabase values into the HTML so the page is right before
+// any JavaScript runs. If the project is unreachable at build time we fall
+// back to the JSON seed rather than failing the build.
+let overrides: Record<string, Partial<Scores>> = {};
+const supabase = getSupabase();
+if (supabase) {
+  const { data, error } = await supabase.from(SCORES_TABLE).select('course_id, scores');
+  if (error) {
+    console.warn(`[coursework] using seed scores — Supabase read failed: ${error.message}`);
+  } else if (data) {
+    overrides = Object.fromEntries(data.map((row) => [row.course_id, row.scores ?? {}]));
+  }
+}
+
+const courses = buildCourses(overrides);
+
 const GROUPS = [
   { key: 'important', label: 'Important', match: (c: Course) => c.important },
   { key: 'loved', label: 'Loved', match: (c: Course) => c.loved && !c.important },
   { key: 'other', label: 'Other', match: (c: Course) => !c.important && !c.loved },
 ];
 
-const defaults = Object.fromEntries(courses.map((c) => [c.id, c.scores]));
-const dimensionConfig = DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight }));
+const clientData = {
+  defaults: Object.fromEntries(courses.map((c) => [c.id, c.scores])),
+  dimensions: DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })),
+  scoreMax: SCORE_MAX,
+  supabaseEnabled: isSupabaseConfigured,
+};
 ---
 
 <Base title="Coursework — Junaid Bhatti">
@@ -56,8 +77,25 @@ const dimensionConfig = DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })
           <button type="button" class="chip" data-save hidden>Save</button>
           <button type="button" class="chip" data-copy hidden>Copy JSON</button>
           <button type="button" class="chip" data-reset hidden>Reset</button>
+          <button type="button" class="chip" data-signout hidden>Sign out</button>
           <span class="control-note" data-status role="status" aria-live="polite"></span>
         </div>
+
+        <form class="signin" data-signin hidden>
+          <div class="signin-label">Sign in to save for everyone</div>
+          <div class="signin-fields">
+            <input type="email" name="email" placeholder="email" autocomplete="username" required />
+            <input
+              type="password"
+              name="password"
+              placeholder="password"
+              autocomplete="current-password"
+              required
+            />
+            <button type="submit" class="chip chip-action">Sign in</button>
+            <button type="button" class="chip" data-signin-cancel>Cancel</button>
+          </div>
+        </form>
       </div>
 
       <details class="legend">
@@ -138,35 +176,44 @@ const dimensionConfig = DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })
     </div>
   </div>
 
-  <script
-    is:inline
-    define:vars={{ defaults, DIMENSIONS: dimensionConfig, SCORE_MAX }}
-  >
-    const KEY = 'coursework-scores-v2';
-    const ENDPOINT = '/api/coursework-scores';
+  <script type="application/json" id="coursework-data" set:html={JSON.stringify(clientData)} />
 
-    const controls = document.querySelector('[data-controls]');
-    const cards = Array.from(document.querySelectorAll('[data-course]'));
-    const groups = Array.from(document.querySelectorAll('[data-group]'));
-    const statusEl = document.querySelector('[data-status]');
-    const emptyEl = document.querySelector('[data-empty]');
-    const minInput = document.getElementById('min-score');
-    const minValueEl = document.querySelector('[data-min-score-value]');
+  <script>
+    import { getSupabase, SCORES_TABLE } from '../lib/supabase';
 
-    const maxWeight = DIMENSIONS.reduce((s, d) => s + d.weight, 0);
+    const config = JSON.parse(document.getElementById('coursework-data')!.textContent!);
+    const { defaults, dimensions, scoreMax, supabaseEnabled } = config;
+
+    const DRAFT_KEY = 'coursework-draft-v1';
+    const DEV_ENDPOINT = '/api/coursework-scores';
+
+    const controls = document.querySelector('[data-controls]') as HTMLElement;
+    const cards = Array.from(document.querySelectorAll('[data-course]')) as HTMLElement[];
+    const groups = Array.from(document.querySelectorAll('[data-group]')) as HTMLElement[];
+    const statusEl = document.querySelector('[data-status]') as HTMLElement;
+    const emptyEl = document.querySelector('[data-empty]') as HTMLElement;
+    const minInput = document.getElementById('min-score') as HTMLInputElement;
+    const minValueEl = document.querySelector('[data-min-score-value]') as HTMLElement;
+    const signinForm = document.querySelector('[data-signin]') as HTMLFormElement;
+    const signoutBtn = document.querySelector('[data-signout]') as HTMLElement;
+
+    const supabase = supabaseEnabled ? getSupabase() : null;
+    const maxWeight = dimensions.reduce((s: number, d: any) => s + d.weight, 0);
+
     const state = {
-      filters: new Set(),
+      filters: new Set<string>(),
       sort: 'section',
       min: 0,
       ranking: false,
       dirty: false,
-      scores: load(),
+      signedIn: false,
+      scores: loadDraft(),
     };
 
-    function load() {
+    function loadDraft() {
       const base = JSON.parse(JSON.stringify(defaults));
       try {
-        const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+        const saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
         for (const id of Object.keys(base)) {
           if (saved[id]) Object.assign(base[id], saved[id]);
         }
@@ -174,31 +221,94 @@ const dimensionConfig = DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })
       return base;
     }
 
-    function stash() {
+    function stashDraft() {
       try {
-        localStorage.setItem(KEY, JSON.stringify(state.scores));
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(state.scores));
       } catch {}
     }
 
-    function totalFor(id) {
-      const s = state.scores[id] || {};
-      const weighted = DIMENSIONS.reduce((sum, d) => sum + (s[d.key] || 0) * d.weight, 0);
-      return maxWeight ? (weighted / maxWeight) * SCORE_MAX : 0;
+    function clearDraft() {
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {}
     }
 
-    function status(text) {
+    function totalFor(id: string) {
+      const s = state.scores[id] || {};
+      const weighted = dimensions.reduce(
+        (sum: number, d: any) => sum + (s[d.key] || 0) * d.weight,
+        0
+      );
+      return maxWeight ? (weighted / maxWeight) * scoreMax : 0;
+    }
+
+    function status(text: string) {
       if (statusEl) statusEl.textContent = text;
     }
 
-    /**
-     * Writes to the JSON file when the dev server is up. On the deployed site
-     * there is nothing listening, so the change stays in this browser and the
-     * copy button is how it reaches the repo.
-     */
-    async function saveToFile() {
+    function syncSliders() {
+      for (const card of cards) {
+        const id = card.dataset.course!;
+        card.querySelectorAll<HTMLInputElement>('[data-dim]').forEach((input) => {
+          const dim = input.dataset.dim!;
+          const value = state.scores[id][dim];
+          input.value = String(value);
+          card.querySelector(`[data-dim-value="${dim}"]`)!.textContent = Number(value).toFixed(2);
+        });
+      }
+    }
+
+    /** Pull the current values so a stale build never shows stale numbers. */
+    async function refreshFromSupabase() {
+      if (!supabase) return;
+      const { data, error } = await supabase.from(SCORES_TABLE).select('course_id, scores');
+      if (error || !data) return;
+      let changed = false;
+      for (const row of data) {
+        const local = state.scores[row.course_id];
+        if (!local || !row.scores) continue;
+        for (const [dim, value] of Object.entries(row.scores)) {
+          if (typeof value === 'number' && local[dim] !== value) {
+            local[dim] = value;
+            changed = true;
+          }
+        }
+      }
+      if (changed && !state.dirty) {
+        syncSliders();
+        render();
+      }
+    }
+
+    async function save() {
+      if (supabase) {
+        if (!state.signedIn) {
+          signinForm.hidden = false;
+          status('Sign in to save.');
+          return;
+        }
+        status('Saving…');
+        const rows = Object.entries(state.scores).map(([course_id, scores]) => ({
+          course_id,
+          scores,
+        }));
+        const { error } = await supabase.from(SCORES_TABLE).upsert(rows, {
+          onConflict: 'course_id',
+        });
+        if (error) {
+          status(`Save failed: ${error.message}`);
+          return;
+        }
+        state.dirty = false;
+        clearDraft();
+        status('Saved — live for everyone.');
+        return;
+      }
+
+      // No Supabase configured: write the JSON file via the dev server.
       status('Saving…');
       try {
-        const response = await fetch(ENDPOINT, {
+        const response = await fetch(DEV_ENDPOINT, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(state.scores),
@@ -206,14 +316,10 @@ const dimensionConfig = DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })
         const result = await response.json();
         if (!response.ok || !result.ok) throw new Error(result.error || 'save failed');
         state.dirty = false;
-        // The file is the source of truth now, so drop the local draft rather
-        // than let it shadow a value edited anywhere else.
-        try {
-          localStorage.removeItem(KEY);
-        } catch {}
+        clearDraft();
         status('Saved to coursework-scores.json — commit it to publish.');
       } catch {
-        status('No dev server, so this is saved in your browser only. Use Copy JSON.');
+        status('Saved in this browser only. Use Copy JSON.');
       }
     }
 
@@ -221,12 +327,12 @@ const dimensionConfig = DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })
       let visible = 0;
 
       for (const card of cards) {
-        const id = card.dataset.course;
+        const id = card.dataset.course!;
         const value = totalFor(id);
         card.dataset.total = value.toFixed(4);
-        card.querySelector('[data-score]').textContent = '(' + value.toFixed(1) + ')';
+        card.querySelector('[data-score]')!.textContent = `(${value.toFixed(1)})`;
 
-        const tags = [];
+        const tags: string[] = [];
         if (card.dataset.important === 'true') tags.push('important');
         if (card.dataset.loved === 'true') tags.push('loved');
         if (!tags.length) tags.push('other');
@@ -238,48 +344,44 @@ const dimensionConfig = DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })
         card.hidden = !show;
         if (show) visible++;
 
-        const ranker = card.querySelector('[data-ranker]');
+        const ranker = card.querySelector('[data-ranker]') as HTMLElement;
         if (ranker) ranker.hidden = !state.ranking;
       }
 
-      // In score order everything sits in one list, so the section heads go away.
       if (state.sort === 'score') {
-        const container = groups[0].querySelector('.list-items');
+        const container = groups[0].querySelector('.list-items')!;
         const ordered = cards
           .slice()
           .sort((a, b) => Number(b.dataset.total) - Number(a.dataset.total));
         for (const card of ordered) container.appendChild(card);
         groups[0].hidden = ordered.every((el) => el.hidden);
-        groups[0].querySelector('[data-group-head]').hidden = true;
+        (groups[0].querySelector('[data-group-head]') as HTMLElement).hidden = true;
         for (const group of groups.slice(1)) group.hidden = true;
       } else {
         for (const card of cards) {
-          const home = document.querySelector(
-            '[data-group="' + card.dataset.home + '"] .list-items'
-          );
+          const home = document.querySelector(`[data-group="${card.dataset.home}"] .list-items`);
           if (home) home.appendChild(card);
         }
         for (const group of groups) {
-          const items = Array.from(group.querySelectorAll('[data-course]'));
+          const items = Array.from(group.querySelectorAll('[data-course]')) as HTMLElement[];
           group.hidden = items.length === 0 || items.every((el) => el.hidden);
-          group.querySelector('[data-group-head]').hidden = false;
+          (group.querySelector('[data-group-head]') as HTMLElement).hidden = false;
         }
       }
 
       if (emptyEl) emptyEl.hidden = visible > 0;
     }
 
-    // Remember each card's original section so "by section" can restore it.
     for (const card of cards) {
-      const group = card.closest('[data-group]');
-      card.dataset.home = group ? group.dataset.group : 'other';
+      const group = card.closest('[data-group]') as HTMLElement | null;
+      card.dataset.home = group ? group.dataset.group! : 'other';
     }
 
     controls.hidden = false;
 
     controls.addEventListener('click', (event) => {
-      const button = event.target.closest('button');
-      if (!button) return;
+      const button = (event.target as HTMLElement).closest('button');
+      if (!button || button.type === 'submit') return;
 
       if (button.dataset.filter) {
         const key = button.dataset.filter;
@@ -302,17 +404,19 @@ const dimensionConfig = DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })
         button.classList.toggle('is-on', state.ranking);
         button.textContent = state.ranking ? 'Done ranking' : 'Rank them';
         for (const attr of ['data-save', 'data-copy', 'data-reset']) {
-          controls.querySelector('[' + attr + ']').hidden = !state.ranking;
+          (controls.querySelector(`[${attr}]`) as HTMLElement).hidden = !state.ranking;
         }
+        signoutBtn.hidden = !(state.ranking && state.signedIn);
+        if (state.ranking && supabase && !state.signedIn) signinForm.hidden = false;
+        if (!state.ranking) signinForm.hidden = true;
         status(state.ranking ? 'Drag a slider, then Save.' : '');
         render();
       }
 
-      if (button.hasAttribute('data-save')) saveToFile();
+      if (button.hasAttribute('data-save')) save();
 
       if (button.hasAttribute('data-copy')) {
-        const text = JSON.stringify(state.scores, null, 2);
-        navigator.clipboard.writeText(text).then(
+        navigator.clipboard.writeText(JSON.stringify(state.scores, null, 2)).then(
           () => status('Copied — paste into src/data/coursework-scores.json'),
           () => status('Copy failed')
         );
@@ -320,23 +424,45 @@ const dimensionConfig = DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })
 
       if (button.hasAttribute('data-reset')) {
         state.scores = JSON.parse(JSON.stringify(defaults));
-        try {
-          localStorage.removeItem(KEY);
-        } catch {}
-        for (const card of cards) {
-          const id = card.dataset.course;
-          card.querySelectorAll('[data-dim]').forEach((input) => {
-            const dim = input.dataset.dim;
-            input.value = state.scores[id][dim];
-            card.querySelector('[data-dim-value="' + dim + '"]').textContent = Number(
-              state.scores[id][dim]
-            ).toFixed(2);
-          });
-        }
+        clearDraft();
+        syncSliders();
         state.dirty = false;
         status('Back to the saved scores.');
         render();
       }
+
+      if (button.hasAttribute('data-signin-cancel')) {
+        signinForm.hidden = true;
+        status('');
+      }
+
+      if (button.hasAttribute('data-signout')) {
+        supabase?.auth.signOut().then(() => {
+          state.signedIn = false;
+          signoutBtn.hidden = true;
+          status('Signed out.');
+        });
+      }
+    });
+
+    signinForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!supabase) return;
+      const data = new FormData(signinForm);
+      status('Signing in…');
+      const { error } = await supabase.auth.signInWithPassword({
+        email: String(data.get('email')),
+        password: String(data.get('password')),
+      });
+      if (error) {
+        status(`Sign-in failed: ${error.message}`);
+        return;
+      }
+      signinForm.reset();
+      signinForm.hidden = true;
+      state.signedIn = true;
+      signoutBtn.hidden = !state.ranking;
+      status('Signed in — Save will publish for everyone.');
     });
 
     controls.addEventListener('input', (event) => {
@@ -347,17 +473,15 @@ const dimensionConfig = DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })
     });
 
     document.addEventListener('input', (event) => {
-      const input = event.target;
+      const input = event.target as HTMLInputElement;
       if (!input.dataset || !input.dataset.dim) return;
-      const card = input.closest('[data-course]');
+      const card = input.closest('[data-course]') as HTMLElement | null;
       if (!card) return;
       const dim = input.dataset.dim;
-      state.scores[card.dataset.course][dim] = Number(input.value);
-      card.querySelector('[data-dim-value="' + dim + '"]').textContent = Number(
-        input.value
-      ).toFixed(2);
+      state.scores[card.dataset.course!][dim] = Number(input.value);
+      card.querySelector(`[data-dim-value="${dim}"]`)!.textContent = Number(input.value).toFixed(2);
       state.dirty = true;
-      stash();
+      stashDraft();
       status('Unsaved changes.');
       render();
     });
@@ -367,6 +491,14 @@ const dimensionConfig = DIMENSIONS.map((d) => ({ key: d.key, weight: d.weight })
       event.preventDefault();
       event.returnValue = '';
     });
+
+    if (supabase) {
+      supabase.auth.getSession().then(({ data }) => {
+        state.signedIn = Boolean(data.session);
+        signoutBtn.hidden = !(state.ranking && state.signedIn);
+      });
+      refreshFromSupabase();
+    }
 
     render();
   </script>
