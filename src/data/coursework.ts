@@ -2,12 +2,11 @@
  * The scoring dimensions. Add or remove one here and the page follows — this
  * list is the only place they are defined.
  *
- * All of them point the same way: more is better. That is why one is rigor
- * rather than difficulty — it covers conceptual difficulty along with the time
- * and effort a class asked for, so a hard course reads as demanding rather than
- * as a complaint.
+ * Every one of them points the same way: a higher number is a better course.
+ * That rules out things like difficulty or rigor, which a course can have a lot
+ * of without being any better for it.
  *
- * Applicability and surprise count half; everything else counts full.
+ * Applicability and surprise count half; the rest count full.
  */
 export const DIMENSIONS = [
   {
@@ -26,18 +25,6 @@ export const DIMENSIONS = [
     key: 'enjoyment',
     label: 'Enjoyment',
     definition: 'The week-to-week experience of being in it',
-    weight: 1,
-  },
-  {
-    key: 'durability',
-    label: 'Durability',
-    definition: 'Whether it stayed with me after',
-    weight: 1,
-  },
-  {
-    key: 'rigor',
-    label: 'Rigor',
-    definition: 'Conceptual difficulty, time and effort',
     weight: 1,
   },
   {
@@ -89,8 +76,6 @@ export const courses: Course[] = [
       interesting: 1,
       teaching: 1,
       enjoyment: 1,
-      durability: 1,
-      rigor: 0.85,
       applicability: 0.7,
       surprise: 0.9,
     },
@@ -105,8 +90,6 @@ export const courses: Course[] = [
       interesting: 0.95,
       teaching: 0.7,
       enjoyment: 0.95,
-      durability: 0.9,
-      rigor: 0.85,
       applicability: 0.9,
       surprise: 0.85,
     },
@@ -120,8 +103,6 @@ export const courses: Course[] = [
       interesting: 0.9,
       teaching: 0.65,
       enjoyment: 0.85,
-      durability: 0.85,
-      rigor: 0.8,
       applicability: 0.9,
       surprise: 0.8,
     },
@@ -135,8 +116,6 @@ export const courses: Course[] = [
       interesting: 0.85,
       teaching: 0.6,
       enjoyment: 0.9,
-      durability: 0.8,
-      rigor: 0.6,
       applicability: 0.5,
       surprise: 0.45,
     },
@@ -150,8 +129,6 @@ export const courses: Course[] = [
       interesting: 0.6,
       teaching: 0.55,
       enjoyment: 0.7,
-      durability: 0.6,
-      rigor: 0.6,
       applicability: 0.8,
       surprise: 0.4,
     },
@@ -165,8 +142,6 @@ export const courses: Course[] = [
       interesting: 0.5,
       teaching: 0.5,
       enjoyment: 0.45,
-      durability: 0.6,
-      rigor: 0.8,
       applicability: 0.85,
       surprise: 0.25,
     },
@@ -181,8 +156,6 @@ export const courses: Course[] = [
       interesting: 0.55,
       teaching: 0.85,
       enjoyment: 0.6,
-      durability: 0.65,
-      rigor: 0.55,
       applicability: 0.85,
       surprise: 0.25,
     },
@@ -197,8 +170,6 @@ export const courses: Course[] = [
       interesting: 0.35,
       teaching: 0.45,
       enjoyment: 0.25,
-      durability: 0.6,
-      rigor: 0.45,
       applicability: 0.8,
       surprise: 0.2,
     },
@@ -213,8 +184,6 @@ export const courses: Course[] = [
       interesting: 0.45,
       teaching: 0.4,
       enjoyment: 0.4,
-      durability: 0.45,
-      rigor: 0.2,
       applicability: 0.6,
       surprise: 0.3,
     },
@@ -228,8 +197,6 @@ export const courses: Course[] = [
       interesting: 0.5,
       teaching: 0.35,
       enjoyment: 0.35,
-      durability: 0.3,
-      rigor: 0.3,
       applicability: 0.35,
       surprise: 0.3,
     },
@@ -243,8 +210,6 @@ export const courses: Course[] = [
       interesting: 0.4,
       teaching: 0.4,
       enjoyment: 0.25,
-      durability: 0.3,
-      rigor: 0.35,
       applicability: 0.45,
       surprise: 0.2,
     },
@@ -259,8 +224,6 @@ export const courses: Course[] = [
       interesting: 0.45,
       teaching: 0.3,
       enjoyment: 0.3,
-      durability: 0.25,
-      rigor: 0.2,
       applicability: 0.3,
       surprise: 0.2,
     },
@@ -274,8 +237,6 @@ export const courses: Course[] = [
       interesting: 0.3,
       teaching: 0.25,
       enjoyment: 0.2,
-      durability: 0.25,
-      rigor: 0.2,
       applicability: 0.25,
       surprise: 0.15,
     },

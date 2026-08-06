@@ -55,10 +55,9 @@ front of a course is the weighted average on a 0–5 scale — straight 1s land 
 exactly 5 whatever the weights sum to, so adding or dropping a dimension does
 not shift what a 4.1 means.
 
-All of them point the same way, more is better. That is why one is rigor rather
-than difficulty: it covers conceptual difficulty along with the time and effort
-a class asked for, so a hard course reads as demanding rather than as a
-complaint.
+Every dimension points the same way: a higher number is a better course. That
+rules out difficulty and rigor, which a class can have plenty of without being
+any better for it.
 
 The page renders both orderings and a small inline script swaps between them,
 so it stays static and ships no bundled JavaScript. Without JS it shows the
