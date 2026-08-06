@@ -77,13 +77,32 @@ npm run notes -- --dry-run
 
 ### Making it automatic
 
-The script only copies files; the site updates when the change is committed and
-pushed. To do the whole thing on a schedule, run this from a launchd agent or a
-cron job:
+`scripts/publish-notes.sh` syncs, commits and pushes in one go, and
+`scripts/com.junaid.personal-site-notes.plist` is a launchd agent that runs it
+whenever the Brain Dump folder changes (plus hourly, in case a change lands
+while the Mac is asleep). Install it with:
 
 ```bash
-npm run notes && git add src/content/notes && git diff --cached --quiet || git commit -m "Sync notes" && git push
+cp scripts/com.junaid.personal-site-notes.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.junaid.personal-site-notes.plist
 ```
+
+**It needs Full Disk Access to work.** Both the vault and this repo live under
+`~/Documents`, which macOS protects, and launchd agents get no access to it by
+default — the agent will fire and immediately fail with "Operation not
+permitted". Grant it under System Settings → Privacy & Security → Full Disk
+Access by adding `/bin/bash`. That is a broad permission: it applies to every
+shell script run on the machine, not just this one.
+
+Logs land in `~/Library/Logs/personal-site-notes.log`. To stop it:
+
+```bash
+launchctl unload ~/Library/LaunchAgents/com.junaid.personal-site-notes.plist
+```
+
+The script only ever stages `src/content/notes`, so work in progress elsewhere
+in the repo is never swept into an automatic commit. If the push fails it stops
+and says so rather than trying to resolve anything itself.
 
 ## Course rankings
 

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.junaid.personal-site-notes</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/junaid/Documents/Claude Vibecoding/personal-site/scripts/publish-notes.sh</string>
+    </array>
+
+    <!-- Runs whenever anything in the Brain Dump folder changes. -->
+    <key>WatchPaths</key>
+    <array>
+        <string>/Users/junaid/Documents/Obsidian/Junaid/junaidb/Writing/Brain Dump</string>
+    </array>
+
+    <!-- A safety net in case a change is missed while the Mac is asleep. -->
+    <key>StartInterval</key>
+    <integer>3600</integer>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/junaid/Library/Logs/personal-site-notes.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/junaid/Library/Logs/personal-site-notes.log</string>
+</dict>
+</plist>
