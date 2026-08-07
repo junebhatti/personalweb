@@ -114,16 +114,22 @@ async function collect() {
     }
 
     // Prefer an explicit date, then Obsidian's created field, then the file.
-    const birth = (await stat(path)).birthtime;
+    const info = await stat(path);
+    // Last-modified, not created: it is when the words actually landed. A note
+    // often exists empty for a while before being written in, and a file
+    // restored from a backup has its creation time reset to the restore.
+    // Either way this only matters on first publish — after that the stored
+    // date is preserved.
+    const written = info.mtime;
     published.push({
       slug: data.slug || slugify(name),
       // `date` pins a note permanently. Everything else is a starting point
       // that a rewrite is allowed to move — see resolveDate below.
       pinned: isoDate(data.date),
-      firstSeen: isoDate(data.created) ?? isoDate(birth),
+      firstSeen: isoDate(data.created) ?? isoDate(written),
       // Time of day, for ordering within a date. The date field only carries
       // the day, so without this, same-day notes sort by slug.
-      birthMs: birth.valueOf(),
+      birthMs: written.valueOf(),
       text,
       name,
     });
