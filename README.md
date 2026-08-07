@@ -98,10 +98,16 @@ git log --oneline                    # find a commit from before the loss
 git show <commit>:"Writing/Brain Dump/note.md" > /path/in/vault/note.md
 ```
 
+Snapshots are local and frequent; the push to the **private** GitHub repo
+`junebhatti/obsidian_backup` is throttled to every 3 days, so ordinary note
+writing doesn't spend a network round trip. Change `PUSH_EVERY_DAYS` in the
+script to adjust.
+
 The repo sits **outside iCloud on purpose**. A `.git` directory inside a synced
-folder gets its internals rewritten mid-operation and corrupts. It is also
-local-only, so it is a history, not an off-machine backup — adding a private
-remote would fix that.
+folder gets its internals rewritten mid-operation and corrupts.
+
+The remote must stay private — the vault holds Career, School, and 90 files of
+People & Networking.
 
 This exists because iCloud is a mirror, not a backup: on 2026-08-06 the Brain
 Dump folder was deleted and vanished everywhere at once. It turned up in
