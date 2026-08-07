@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import CourseLine from '../components/CourseLine.astro';
 import {
   courses,
   currentCourses,
@@ -59,12 +60,7 @@ const byScore = [...courses].sort((a, b) => total(b.scores) - total(a.scores));
 
       <div data-view="score">
         <div class="list-items">
-          {byScore.map((course) => (
-            <div class="course-line">
-              <span class="course-score">({formatTotal(total(course.scores))})</span>{' '}
-              <span class="item-name">{course.name}</span> — {course.comment}
-            </div>
-          ))}
+          {byScore.map((course) => <CourseLine course={course} />)}
         </div>
       </div>
 
@@ -76,12 +72,7 @@ const byScore = [...courses].sort((a, b) => total(b.scores) - total(a.scores));
             <div class="list-section">
               <div class="subhead">{group.label}</div>
               <div class="list-items">
-                {inGroup.map((course) => (
-                  <div class="course-line">
-                    <span class="course-score">({formatTotal(total(course.scores))})</span>{' '}
-                    <span class="item-name">{course.name}</span> — {course.comment}
-                  </div>
-                ))}
+                {inGroup.map((course) => <CourseLine course={course} />)}
               </div>
             </div>
           );

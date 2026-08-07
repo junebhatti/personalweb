@@ -516,6 +516,91 @@ a:hover {
   font-variant-numeric: tabular-nums;
 }
 
+/* Each course opens to show how it was graded. The blue name carries the
+   affordance, so the default disclosure triangle would just be noise. */
+.course > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.course > summary::-webkit-details-marker {
+  display: none;
+}
+
+.course > summary:hover .item-name {
+  color: #1a1aff;
+}
+
+.rubric {
+  margin: 12px 0 18px;
+  max-width: 460px;
+  font-size: 14px;
+}
+
+.rubric-row {
+  display: grid;
+  grid-template-columns: 104px 1fr 38px 26px;
+  gap: 12px;
+  align-items: center;
+  padding: 5px 0;
+  border-top: 1px solid #eee;
+}
+
+.rubric-row:first-child {
+  border-top-color: #ddd;
+}
+
+.rubric dt {
+  color: #666;
+}
+
+.rubric dd {
+  margin: 0;
+}
+
+/* A plain filled rule — the only chart on the site, and deliberately flat. */
+.rubric-bar {
+  height: 3px;
+  background: #eee;
+}
+
+.rubric-bar span {
+  display: block;
+  height: 100%;
+  background: #45539b;
+}
+
+.rubric-value {
+  text-align: right;
+  color: #111;
+  font-variant-numeric: tabular-nums;
+}
+
+.rubric-weight {
+  text-align: right;
+  color: #aaa;
+  font-variant-numeric: tabular-nums;
+}
+
+.rubric-total {
+  border-top-color: #ddd;
+}
+
+.rubric-total dt {
+  color: #111;
+}
+
+.rubric-total .rubric-bar {
+  background: none;
+}
+
+@media (max-width: 600px) {
+  .rubric-row {
+    grid-template-columns: 92px 1fr 36px 24px;
+    gap: 8px;
+  }
+}
+
 /* --- Interests --- */
 
 .interests-content {

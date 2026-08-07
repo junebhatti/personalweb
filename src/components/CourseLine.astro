@@ -1,0 +1,37 @@
+---
+import { DIMENSIONS, total, formatTotal, type Course } from '../data/coursework';
+
+interface Props {
+  course: Course;
+}
+
+const { course } = Astro.props;
+const weightLabel = (weight: number) =>
+  weight === 1 ? '1' : weight === 0.5 ? '½' : String(weight);
+---
+
+<details class="course">
+  <summary class="course-line">
+    <span class="course-score">({formatTotal(total(course.scores))})</span>{' '}
+    <span class="item-name">{course.name}</span> — {course.comment}
+  </summary>
+
+  <dl class="rubric">
+    {DIMENSIONS.map((d) => (
+      <div class="rubric-row">
+        <dt>{d.label}</dt>
+        <dd class="rubric-bar" aria-hidden="true">
+          <span style={`width: ${course.scores[d.key] * 100}%`}></span>
+        </dd>
+        <dd class="rubric-value">{course.scores[d.key].toFixed(2)}</dd>
+        <dd class="rubric-weight">×{weightLabel(d.weight)}</dd>
+      </div>
+    ))}
+    <div class="rubric-row rubric-total">
+      <dt>Score</dt>
+      <dd class="rubric-bar" aria-hidden="true"></dd>
+      <dd class="rubric-value">{formatTotal(total(course.scores))}</dd>
+      <dd class="rubric-weight">/5</dd>
+    </div>
+  </dl>
+</details>
