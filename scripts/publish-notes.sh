@@ -19,6 +19,10 @@ echo "--- $(date '+%Y-%m-%d %H:%M:%S') ---"
 # Obsidian is still writing. A beat avoids syncing a half-written note.
 sleep 3
 
+# Snapshot the whole vault first, so a run that finds the source folder
+# missing has already preserved whatever state the vault is in.
+"$REPO/scripts/backup-vault.sh" || echo "vault backup failed (continuing)"
+
 if ! npm run notes --silent; then
   echo "sync failed"
   exit 1

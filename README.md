@@ -86,6 +86,29 @@ Use `--dry-run` to see what would change without writing anything:
 npm run notes -- --dry-run
 ```
 
+### Vault backup
+
+`scripts/backup-vault.sh` snapshots the whole Obsidian vault into a git repo at
+`~/Library/Application Support/obsidian-vault-backup`, and the launchd agent
+runs it before every sync. Recovering a deleted note:
+
+```bash
+cd ~/Library/Application\ Support/obsidian-vault-backup
+git log --oneline                    # find a commit from before the loss
+git show <commit>:"Writing/Brain Dump/note.md" > /path/in/vault/note.md
+```
+
+The repo sits **outside iCloud on purpose**. A `.git` directory inside a synced
+folder gets its internals rewritten mid-operation and corrupts. It is also
+local-only, so it is a history, not an off-machine backup — adding a private
+remote would fix that.
+
+This exists because iCloud is a mirror, not a backup: on 2026-08-06 the Brain
+Dump folder was deleted and vanished everywhere at once. It turned up in
+iCloud's own trash at `~/Library/Mobile Documents/.Trash`, which is separate
+from the Finder Trash and purges after 30 days — worth checking first if
+something disappears.
+
 ### Making it automatic
 
 `scripts/publish-notes.sh` syncs, commits and pushes in one go, and
