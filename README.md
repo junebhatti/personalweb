@@ -69,8 +69,15 @@ save** — so either install the template, or draft in a different folder and mo
 the note in when it is done. Moving it in is the more foolproof of the two,
 since a note outside the folder cannot publish whatever its frontmatter says.
 
-No frontmatter is needed. The date falls back from `date`, to `created`, to the
-file's creation time; the slug comes from the filename.
+**A note is dated when you publish it** — the moment you untick draft — not when
+the file was created or last edited. The sync watches the folder, so it sees
+that moment directly instead of inferring it from filesystem timestamps, which
+a restore or a sync can rewrite. Once published the date is fixed, so editing a
+note never shuffles it to the top; only a rewrite that keeps under half the old
+text re-dates it.
+
+To override, put `date: YYYY-MM-DD` in the note's frontmatter — that pins it
+permanently. The slug comes from the filename.
 
 On the way out the script fixes what would otherwise not survive the trip:
 `%%comments%%`, `![[embeds]]` and callout headers are stripped, `[[wikilinks]]`

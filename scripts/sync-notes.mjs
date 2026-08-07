@@ -10,7 +10,7 @@
  *   node scripts/sync-notes.mjs            # write changes
  *   node scripts/sync-notes.mjs --dry-run  # report only
  */
-import { readdir, readFile, writeFile, unlink, stat, mkdir } from 'node:fs/promises';
+import { readdir, readFile, writeFile, unlink, mkdir } from 'node:fs/promises';
 import { join, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -114,22 +114,10 @@ async function collect() {
     }
 
     // Prefer an explicit date, then Obsidian's created field, then the file.
-    const info = await stat(path);
-    // Last-modified, not created: it is when the words actually landed. A note
-    // often exists empty for a while before being written in, and a file
-    // restored from a backup has its creation time reset to the restore.
-    // Either way this only matters on first publish — after that the stored
-    // date is preserved.
-    const written = info.mtime;
     published.push({
       slug: data.slug || slugify(name),
-      // `date` pins a note permanently. Everything else is a starting point
-      // that a rewrite is allowed to move — see resolveDate below.
+      // `date` in the vault pins a note permanently; nothing else moves it.
       pinned: isoDate(data.date),
-      firstSeen: isoDate(data.created) ?? isoDate(written),
-      // Time of day, for ordering within a date. The date field only carries
-      // the day, so without this, same-day notes sort by slug.
-      birthMs: written.valueOf(),
       text,
       name,
     });
@@ -184,17 +172,24 @@ function similarity(a, b) {
 /** Below this, an edit counts as a rewrite rather than a revision. */
 const REWRITE_BELOW = 0.5;
 
-const today = isoDate(new Date());
+/** The moment this run is publishing. */
+const NOW = new Date();
+const today = isoDate(NOW);
 
 /**
- * A published note keeps the date it went out with, so editing it does not
- * shuffle it to the top of the page. Two things override that: an explicit
- * `date` in the vault pins it for good, and a rewrite substantial enough to
- * make it a different note re-dates it to today.
+ * A note is dated when it is published — the moment you untick draft — not
+ * when the file was created or last touched. The sync watches the folder, so
+ * it sees that moment directly rather than inferring it from the filesystem,
+ * whose timestamps a restore or a sync can rewrite.
+ *
+ * Once published the date is fixed, so editing a note does not shuffle it to
+ * the top of the page. Two things override that: `date` in the vault frontmatter
+ * pins it for good, and a rewrite substantial enough to make it a different
+ * note re-dates it to now.
  */
 function resolveDate(note, previous) {
   if (note.pinned) return { date: note.pinned, why: null };
-  if (!previous?.date) return { date: note.firstSeen, why: null };
+  if (!previous?.date) return { date: today, why: null };
 
   const score = similarity(previous.body, note.text);
   if (score < REWRITE_BELOW) {
@@ -211,9 +206,9 @@ for (const note of published) {
   const previous = generated.get(note.slug);
   const { date, why } = resolveDate(note, previous);
 
-  // Within a day, notes order by when they were written. A note keeps its
+  // Within a day, notes order by when they were published. A note keeps its
   // order once published; a re-dated rewrite moves to now.
-  const order = why ? Date.now() : previous?.order ?? note.birthMs;
+  const order = why ? Date.now() : previous?.order ?? NOW.valueOf();
 
   // The display time is fixed here, in this machine's timezone, because the
   // production build runs in UTC and would shift it.
