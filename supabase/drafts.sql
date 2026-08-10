@@ -8,6 +8,9 @@ create table if not exists public.drafts (
   id         bigint generated always as identity primary key,
   body       text not null,
   key        text not null,
+  -- true when sent with "Publish" rather than "Save", meaning it should go
+  -- straight to the site rather than waiting to be reviewed.
+  publish    boolean not null default false,
   created_at timestamptz not null default now(),
   claimed_at timestamptz
 );

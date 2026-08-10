@@ -24,7 +24,10 @@ const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && DRAFT_KEY);
 
         <div class="draft-bar">
           <span class="draft-status" data-status role="status" aria-live="polite"></span>
-          <button type="button" class="draft-save" data-save>Save</button>
+          <button type="button" class="draft-btn draft-btn-quiet" data-send="draft">
+            Save as draft
+          </button>
+          <button type="button" class="draft-btn" data-send="publish">Publish</button>
         </div>
       </>
     ) : (
@@ -41,7 +44,7 @@ const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && DRAFT_KEY);
   >
     if (configured) {
       const input = document.querySelector('[data-input]');
-      const save = document.querySelector('[data-save]');
+      const buttons = Array.from(document.querySelectorAll('[data-send]'));
       const status = document.querySelector('[data-status]');
       const STASH = 'draft-in-progress';
 
@@ -53,12 +56,12 @@ const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && DRAFT_KEY);
         status.textContent = '';
       });
 
-      async function send() {
+      async function send(publish) {
         const body = input.value.trim();
         if (!body) return;
 
-        save.disabled = true;
-        status.textContent = 'Saving…';
+        buttons.forEach((b) => (b.disabled = true));
+        status.textContent = publish ? 'Publishing…' : 'Saving…';
 
         try {
           const response = await fetch(`${SUPABASE_URL}/rest/v1/drafts`, {
@@ -69,24 +72,28 @@ const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && DRAFT_KEY);
               'content-type': 'application/json',
               prefer: 'return=minimal',
             },
-            body: JSON.stringify({ body, key: DRAFT_KEY }),
+            body: JSON.stringify({ body, key: DRAFT_KEY, publish }),
           });
           if (!response.ok) throw new Error(String(response.status));
 
           input.value = '';
           localStorage.removeItem(STASH);
-          status.textContent = 'Saved — it will land in Obsidian next time your Mac is on.';
+          status.textContent = publish
+            ? 'Publishing — it goes live next time your Mac is on.'
+            : 'Saved as a draft — it will be waiting in Obsidian.';
         } catch {
           // The text is still stashed locally, so nothing is lost.
-          status.textContent = 'Could not save. Your text is kept here — try again.';
+          status.textContent = 'Could not send. Your text is kept here — try again.';
         } finally {
-          save.disabled = false;
+          buttons.forEach((b) => (b.disabled = false));
         }
       }
 
-      save.addEventListener('click', send);
+      for (const button of buttons) {
+        button.addEventListener('click', () => send(button.dataset.send === 'publish'));
+      }
       input.addEventListener('keydown', (event) => {
-        if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') send();
+        if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') send(false);
       });
     }
   </script>

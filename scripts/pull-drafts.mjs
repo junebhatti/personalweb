@@ -59,7 +59,7 @@ async function uniquePath(title) {
 }
 
 const response = await fetch(
-  `${URL_BASE}/rest/v1/drafts?claimed_at=is.null&select=id,body,created_at&order=created_at.asc`,
+  `${URL_BASE}/rest/v1/drafts?claimed_at=is.null&select=id,body,publish,created_at&order=created_at.asc`,
   { headers }
 );
 
@@ -81,12 +81,16 @@ for (const draft of drafts) {
   const pad = (n) => String(n).padStart(2, '0');
   const day = `${created.getFullYear()}-${pad(created.getMonth() + 1)}-${pad(created.getDate())}`;
 
-  // draft: true so it lands quietly. `created` records when it was written on
-  // the phone; the published date still comes from unticking draft.
-  const file = `---\ncreated: ${day}\ndraft: true\nfrom: phone\n---\n\n${draft.body.trim()}\n`;
+  // Sent with "Save" it lands as a draft to be read back; sent with "Publish"
+  // it goes straight out on this run. `created` records when it was written on
+  // the phone, but the published date still comes from this moment.
+  const isDraft = draft.publish !== true;
+  const file =
+    `---\ncreated: ${day}\ndraft: ${isDraft}\nfrom: phone\n---\n\n${draft.body.trim()}\n`;
 
   if (!dryRun) await writeFile(path, file, 'utf-8');
-  console.log(`  + ${path.split('/').pop().replace(/\.md$/, '')}`);
+  const label = isDraft ? 'draft' : 'publishing';
+  console.log(`  + ${path.split('/').pop().replace(/\.md$/, '')}  (${label})`);
   claimed.push(draft.id);
 }
 

@@ -858,24 +858,41 @@ a:hover {
 }
 
 .draft-status {
-  flex: 1;
+  flex: 1 1 100%;
+  order: -1;
   font-size: 14px;
   line-height: 1.4;
   color: #888;
 }
 
-.draft-save {
+.draft-bar {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.draft-btn {
   font: inherit;
   font-size: 16px;
   color: #fff;
   background: #45539b;
   border: 0;
-  padding: 11px 22px;
+  padding: 11px 20px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
-.draft-save:disabled {
+/* Saving is the safe, everyday action, so it stays quiet; publishing is the
+   one that puts words on the internet, so it carries the weight. */
+.draft-btn-quiet {
+  color: #45539b;
+  background: none;
+  border: 1px solid #ddd;
+}
+
+.draft-btn:disabled {
+  color: #fff;
   background: #aab;
+  border-color: #aab;
 }
 
 .draft-unconfigured {

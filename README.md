@@ -100,13 +100,18 @@ away. Writing there posts to a Supabase table; `scripts/pull-drafts.mjs` drains
 that table into Brain Dump next time the Mac runs the agent, and marks the rows
 claimed so nothing arrives twice.
 
-Notes from the phone land with `draft: true`, so they never publish themselves.
-You read them back on the Mac, edit if you want, and untick draft — which is
-also when the note gets its date.
+Two buttons. **Save as draft** lands the note in Obsidian with `draft: true`,
+waiting to be read back. **Publish** lands it with `draft: false`, so it goes
+to the site on that same run without review.
+
+Either way the note reaches the site only once the Mac has run the agent —
+the site is static, so nothing appears until a build. Publishing from the
+phone skips the review step, not the wait.
 
 Setup:
 
-1. Run `supabase/drafts.sql`, replacing `CHANGE-ME` with a long random string.
+1. Run `supabase/drafts.sql` in the SQL editor of the Supabase project
+   (`mmvxezaabgzvifadozth`), replacing `CHANGE-ME` with a long random string.
 2. Copy `.env.example` to `.env` and fill it in. The same random string goes in
    `PUBLIC_DRAFT_KEY`; put the `PUBLIC_` values in Vercel too.
 3. Add `/draft` to your phone's home screen.
