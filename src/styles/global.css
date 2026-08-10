@@ -828,9 +828,11 @@ a:hover {
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
-  align-items: center;
+  /* Sitting above centre rather than in it — the box should meet your thumb
+     on the way up the screen, not sit in the middle of a blue field. */
+  align-items: flex-start;
   justify-content: center;
-  padding: 20px;
+  padding: clamp(28px, 13vh, 110px) 20px 20px;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
   background: #45539b;
 }
@@ -844,10 +846,10 @@ a:hover {
 }
 
 .draft-input {
-  /* Half the screen. dvh so the box shrinks with the keyboard rather than
-     pushing the buttons off the bottom. */
-  height: 50dvh;
-  min-height: 190px;
+  /* A shade under half the screen. dvh so the box shrinks with the keyboard
+     rather than pushing the buttons off the bottom. */
+  height: 46dvh;
+  min-height: 180px;
   width: 100%;
   background: #fff;
   border: 2px solid #000;
