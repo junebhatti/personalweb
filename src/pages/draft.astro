@@ -1,0 +1,93 @@
+---
+import Base from '../layouts/Base.astro';
+
+// Unlisted on purpose: nothing links here, and it asks search engines to stay
+// away. It is a private writing surface, not a page of the site.
+const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL ?? '';
+const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+const DRAFT_KEY = import.meta.env.PUBLIC_DRAFT_KEY ?? '';
+const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && DRAFT_KEY);
+---
+
+<Base title="Draft" noindex>
+  <div class="draft-page">
+    {configured ? (
+      <>
+        <textarea
+          class="draft-input"
+          data-input
+          placeholder="Write."
+          autocapitalize="sentences"
+          autocorrect="on"
+          spellcheck="true"
+        ></textarea>
+
+        <div class="draft-bar">
+          <span class="draft-status" data-status role="status" aria-live="polite"></span>
+          <button type="button" class="draft-save" data-save>Save</button>
+        </div>
+      </>
+    ) : (
+      <p class="draft-unconfigured">
+        Not configured. Set PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY and
+        PUBLIC_DRAFT_KEY, and run supabase/drafts.sql.
+      </p>
+    )}
+  </div>
+
+  <script
+    is:inline
+    define:vars={{ SUPABASE_URL, SUPABASE_ANON_KEY, DRAFT_KEY, configured }}
+  >
+    if (configured) {
+      const input = document.querySelector('[data-input]');
+      const save = document.querySelector('[data-save]');
+      const status = document.querySelector('[data-status]');
+      const STASH = 'draft-in-progress';
+
+      // Keep what you typed on the device until it is safely sent, so closing
+      // the tab or losing signal mid-thought never costs the note.
+      input.value = localStorage.getItem(STASH) ?? '';
+      input.addEventListener('input', () => {
+        localStorage.setItem(STASH, input.value);
+        status.textContent = '';
+      });
+
+      async function send() {
+        const body = input.value.trim();
+        if (!body) return;
+
+        save.disabled = true;
+        status.textContent = 'Saving…';
+
+        try {
+          const response = await fetch(`${SUPABASE_URL}/rest/v1/drafts`, {
+            method: 'POST',
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+              'content-type': 'application/json',
+              prefer: 'return=minimal',
+            },
+            body: JSON.stringify({ body, key: DRAFT_KEY }),
+          });
+          if (!response.ok) throw new Error(String(response.status));
+
+          input.value = '';
+          localStorage.removeItem(STASH);
+          status.textContent = 'Saved — it will land in Obsidian next time your Mac is on.';
+        } catch {
+          // The text is still stashed locally, so nothing is lost.
+          status.textContent = 'Could not save. Your text is kept here — try again.';
+        } finally {
+          save.disabled = false;
+        }
+      }
+
+      save.addEventListener('click', send);
+      input.addEventListener('keydown', (event) => {
+        if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') send();
+      });
+    }
+  </script>
+</Base>

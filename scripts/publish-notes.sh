@@ -23,6 +23,11 @@ sleep 3
 # missing has already preserved whatever state the vault is in.
 "$REPO/scripts/backup-vault.sh" || echo "vault backup failed (continuing)"
 
+# Bring down anything written on the phone before syncing, so a note drafted
+# away from the Mac joins this run rather than waiting for the next one.
+[ -f "$REPO/.env" ] && set -a && . "$REPO/.env" && set +a
+node "$REPO/scripts/pull-drafts.mjs" || echo "phone draft pull failed (continuing)"
+
 if ! npm run notes --silent; then
   echo "sync failed"
   exit 1
