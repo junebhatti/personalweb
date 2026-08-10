@@ -821,19 +821,112 @@ a:hover {
 
 /* --- Phone drafting (/draft, unlisted) --- */
 
-/* Built for a thumb: the text fills the screen and the only control sits
-   above the keyboard. Nothing else on the page competes with writing. */
+/* A text editor from before the web, sized for a thumb. The window is the
+   whole screen, the document is the whole window, and the only two controls
+   sit above the keyboard. Nothing here is shared with the rest of the site —
+   this page is the one place with chrome on it, on purpose. */
 .draft-page {
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  gap: 12px;
+  padding: 12px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  background: #45539b;
+}
+
+.draft-win {
+  flex: 1;
+  /* Without this the textarea's own height wins and the window overflows. */
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.draft-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  background: #000;
+  color: #fff;
+  padding: 6px 8px;
+}
+
+/* Chrome, not controls — there is nowhere to close a private notepad to, so
+   none of the three do anything. */
+.draft-keys {
+  display: flex;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+
+.draft-key {
+  width: 19px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  background: #ded3d0;
+  color: #000;
+}
+
+.draft-key svg {
+  display: block;
+  width: 11px;
+  height: 11px;
+  shape-rendering: crispEdges;
+}
+
+.draft-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The ruler is what makes it a document rather than a form field. */
+.draft-ruler {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
+  height: 22px;
+  padding: 0 9px 4px;
+  background: #f2f1ee;
+  border-bottom: 2px solid #000;
+}
+
+.draft-ruler-ticks {
+  flex: 1 1 auto;
+  height: 10px;
+  background-image:
+    repeating-linear-gradient(to right, #aaa 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(to right, #666 0 1px, transparent 1px 48px);
+  background-size: 100% 4px, 100% 9px;
+  background-position: left bottom, left bottom;
+  background-repeat: no-repeat;
+}
+
+/* Live word count, sitting where a ruler would show a measurement. */
+.draft-count {
+  flex: 0 0 auto;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #999;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .draft-input {
   flex: 1;
+  min-height: 0;
   width: 100%;
   border: 0;
   resize: none;
@@ -844,39 +937,47 @@ a:hover {
   line-height: 1.5;
   color: #111;
   background: none;
+  padding: 18px 16px;
+  /* Momentum scrolling inside the document rather than bouncing the page. */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .draft-input::placeholder {
-  color: #ccc;
+  color: #c8c8c8;
 }
 
+/* Two equal thumb targets on one row, with the status above them when there is
+   something to say — a flex row wraps into a stagger at phone widths. */
 .draft-bar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding-bottom: env(safe-area-inset-bottom);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 9px 10px;
+  border-top: 2px solid #000;
+  background: #f2f1ee;
 }
 
 .draft-status {
-  flex: 1 1 100%;
-  order: -1;
-  font-size: 14px;
-  line-height: 1.4;
-  color: #888;
+  grid-column: 1 / -1;
+  font-size: 13px;
+  line-height: 1.35;
+  color: #666;
 }
 
-.draft-bar {
-  flex-wrap: wrap;
-  gap: 10px;
+/* Silent most of the time, and an empty row of padding reads as a mistake. */
+.draft-status:empty {
+  display: none;
 }
 
 .draft-btn {
   font: inherit;
   font-size: 16px;
   color: #fff;
-  background: #45539b;
-  border: 0;
-  padding: 11px 20px;
+  background: #000;
+  border: 2px solid #000;
+  padding: 13px 18px;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -884,20 +985,20 @@ a:hover {
 /* Saving is the safe, everyday action, so it stays quiet; publishing is the
    one that puts words on the internet, so it carries the weight. */
 .draft-btn-quiet {
-  color: #45539b;
-  background: none;
-  border: 1px solid #ddd;
+  color: #000;
+  background: #fff;
 }
 
 .draft-btn:disabled {
   color: #fff;
-  background: #aab;
-  border-color: #aab;
+  background: #999;
+  border-color: #999;
 }
 
 .draft-unconfigured {
   font-size: 15px;
   line-height: 1.55;
   color: #888;
-  max-width: 420px;
+  padding: 18px 16px;
+  margin: 0;
 }
