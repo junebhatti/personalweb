@@ -5,9 +5,24 @@ interface Props {
   title: string;
   /** Unlisted pages ask search engines to stay away. */
   noindex?: boolean;
+  /** Name under the icon once the page is on a phone's home screen. */
+  appTitle?: string;
+  /** Launch from the home screen without any browser chrome. */
+  standalone?: boolean;
+  /** Tints the status bar in standalone mode. */
+  themeColor?: string;
+  /** Android reads this; iOS uses the apple-touch-icon and the meta tags. */
+  manifest?: string;
 }
 
-const { title, noindex = false } = Astro.props;
+const {
+  title,
+  noindex = false,
+  appTitle = 'Junaid Bhatti',
+  standalone = false,
+  themeColor = '#ffffff',
+  manifest = '/site.webmanifest',
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -17,6 +32,24 @@ const { title, noindex = false } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <title>{title}</title>
+
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon-192.png" type="image/png" sizes="192x192" />
+    {/* iOS only reads this one, and only at 180×180. */}
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href={manifest} />
+    <meta name="theme-color" content={themeColor} />
+
+    {standalone && (
+      <>
+        {/* The apple- prefix is the one iOS actually honours; the unprefixed
+            name is the standard that replaced it. */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </>
+    )}
+    <meta name="apple-mobile-web-app-title" content={appTitle} />
   </head>
   <body>
     <slot />

@@ -9,36 +9,16 @@ const DRAFT_KEY = import.meta.env.PUBLIC_DRAFT_KEY ?? '';
 const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && DRAFT_KEY);
 ---
 
-<Base title="Draft" noindex>
+<Base
+  title="Draft"
+  noindex
+  appTitle="Draft"
+  standalone
+  themeColor="#45539b"
+  manifest="/draft.webmanifest"
+>
   <div class="draft-page">
-    <div class="draft-win">
-      <div class="draft-titlebar">
-        <span class="draft-keys" aria-hidden="true">
-          <span class="draft-key">
-            <svg viewBox="0 0 12 12">
-              <path d="M2 2 10 10M10 2 2 10" stroke="currentColor" stroke-width="2.4" />
-            </svg>
-          </span>
-          <span class="draft-key">
-            <svg viewBox="0 0 12 12">
-              <rect x="2.2" y="2.2" width="7.6" height="7.6" fill="none"
-                stroke="currentColor" stroke-width="2.2" />
-            </svg>
-          </span>
-          <span class="draft-key">
-            <svg viewBox="0 0 12 12">
-              <rect x="2" y="7.4" width="8" height="2.4" fill="currentColor" />
-            </svg>
-          </span>
-        </span>
-        <span class="draft-title" data-title>untitled</span>
-      </div>
-
-      <div class="draft-ruler">
-        <span class="draft-ruler-ticks" aria-hidden="true"></span>
-        <span class="draft-count" data-count></span>
-      </div>
-
+    <div class="draft-shell">
       {configured ? (
         <>
           <textarea
@@ -51,12 +31,13 @@ const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && DRAFT_KEY);
           ></textarea>
 
           <div class="draft-bar">
-            <span class="draft-status" data-status role="status" aria-live="polite"></span>
             <button type="button" class="draft-btn draft-btn-quiet" data-send="draft">
               Save as draft
             </button>
             <button type="button" class="draft-btn" data-send="publish">Publish</button>
           </div>
+
+          <span class="draft-status" data-status role="status" aria-live="polite"></span>
         </>
       ) : (
         <p class="draft-unconfigured">
@@ -75,27 +56,14 @@ const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && DRAFT_KEY);
       const input = document.querySelector('[data-input]');
       const buttons = Array.from(document.querySelectorAll('[data-send]'));
       const status = document.querySelector('[data-status]');
-      const title = document.querySelector('[data-title]');
-      const count = document.querySelector('[data-count]');
       const STASH = 'draft-in-progress';
-
-      // The title bar and the ruler report the document back to you, the way
-      // a text editor does: unsent text is "edited", and the ruler counts it.
-      function describe() {
-        const text = input.value.trim();
-        const words = text ? text.split(/\s+/).length : 0;
-        title.textContent = text ? 'untitled — edited' : 'untitled';
-        count.textContent = words ? `${words} ${words === 1 ? 'word' : 'words'}` : '';
-      }
 
       // Keep what you typed on the device until it is safely sent, so closing
       // the tab or losing signal mid-thought never costs the note.
       input.value = localStorage.getItem(STASH) ?? '';
-      describe();
       input.addEventListener('input', () => {
         localStorage.setItem(STASH, input.value);
         status.textContent = '';
-        describe();
       });
 
       async function send(publish) {
@@ -120,7 +88,6 @@ const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && DRAFT_KEY);
 
           input.value = '';
           localStorage.removeItem(STASH);
-          describe();
           status.textContent = publish
             ? 'Publishing — it goes live next time your Mac is on.'
             : 'Saved as a draft — it will be waiting in Obsidian.';
