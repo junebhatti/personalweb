@@ -6,3 +6,5 @@ source: obsidian
 ---
 
 the reward isn't always from the completion of a task, adventure, project, it comes from action and attempt. and, hidden rewards that you weren't initially chasing reveal themselves in the process – often surpassing expectations of your foreseen reward.
+
+^ what I
