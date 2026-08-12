@@ -25,8 +25,13 @@ sleep 3
 
 # Bring down anything written on the phone before syncing, so a note drafted
 # away from the Mac joins this run rather than waiting for the next one.
+#
+# Invoked through npm rather than as `node scripts/...`. Under launchd the
+# direct call fails with EPERM reading its own entry script, while the npm
+# route — the same node, the same folder — is allowed. Both work by hand, so
+# this is macOS deciding what the agent may open, not anything in the script.
 [ -f "$REPO/.env" ] && set -a && . "$REPO/.env" && set +a
-node "$REPO/scripts/pull-drafts.mjs" || echo "phone draft pull failed (continuing)"
+npm run drafts --silent || echo "phone draft pull failed (continuing)"
 
 if ! npm run notes --silent; then
   echo "sync failed"

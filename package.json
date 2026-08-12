@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "notes": "node scripts/sync-notes.mjs"
+    "notes": "node scripts/sync-notes.mjs",
+    "drafts": "node scripts/pull-drafts.mjs"
   },
   "dependencies": {
     "astro": "^5.0.0"
