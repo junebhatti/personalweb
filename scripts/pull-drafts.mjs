@@ -82,11 +82,17 @@ for (const draft of drafts) {
   const day = `${created.getFullYear()}-${pad(created.getMonth() + 1)}-${pad(created.getDate())}`;
 
   // Sent with "Save" it lands as a draft to be read back; sent with "Publish"
-  // it goes straight out on this run. `created` records when it was written on
-  // the phone, but the published date still comes from this moment.
+  // it goes straight out on this run.
   const isDraft = draft.publish !== true;
+
+  // Publishing on the phone is the publish. `published` carries that exact
+  // moment through to the sync, so the note is dated when you pressed the
+  // button rather than whenever this Mac next happened to be on — which can
+  // be the following afternoon. A saved draft gets no stamp: its publish
+  // moment is still ahead of it, when you untick draft.
+  const stamp = isDraft ? '' : `published: ${draft.created_at}\n`;
   const file =
-    `---\ncreated: ${day}\ndraft: ${isDraft}\nfrom: phone\n---\n\n${draft.body.trim()}\n`;
+    `---\ncreated: ${day}\n${stamp}draft: ${isDraft}\nfrom: phone\n---\n\n${draft.body.trim()}\n`;
 
   if (!dryRun) await writeFile(path, file, 'utf-8');
   const label = isDraft ? 'draft' : 'publishing';

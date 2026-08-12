@@ -113,11 +113,15 @@ async function collect() {
       continue;
     }
 
-    // Prefer an explicit date, then Obsidian's created field, then the file.
+    // A note published from the phone carries the moment Publish was pressed
+    // there. Anything else is dated by this run.
+    const stamped = data.published ? new Date(data.published) : null;
+
     published.push({
       slug: data.slug || slugify(name),
       // `date` in the vault pins a note permanently; nothing else moves it.
       pinned: isoDate(data.date),
+      at: stamped && !Number.isNaN(stamped.valueOf()) ? stamped : null,
       text,
       name,
     });
@@ -189,6 +193,9 @@ const today = isoDate(NOW);
  */
 function resolveDate(note, previous) {
   if (note.pinned) return { date: note.pinned, why: null };
+  // Published from the phone — that moment is the publish, however long the
+  // note then sat waiting for this machine to come online and collect it.
+  if (note.at) return { date: isoDate(note.at), why: null };
   if (!previous?.date) return { date: today, why: null };
 
   const score = similarity(previous.body, note.text);
@@ -207,8 +214,13 @@ for (const note of published) {
   const { date, why } = resolveDate(note, previous);
 
   // Within a day, notes order by when they were published. A note keeps its
-  // order once published; a re-dated rewrite moves to now.
-  const order = why ? Date.now() : previous?.order ?? NOW.valueOf();
+  // order once published; a re-dated rewrite moves to now. A phone note orders
+  // by its own stamp, so it lands at the hour it was actually written.
+  const order = note.at
+    ? note.at.valueOf()
+    : why
+      ? Date.now()
+      : previous?.order ?? NOW.valueOf();
 
   // The display time is fixed here, in this machine's timezone, because the
   // production build runs in UTC and would shift it.
