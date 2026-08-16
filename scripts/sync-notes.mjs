@@ -173,8 +173,54 @@ function similarity(a, b) {
   return (2 * common) / (A.length + B.length);
 }
 
-/** Below this, an edit counts as a rewrite rather than a revision. */
-const REWRITE_BELOW = 0.5;
+/** Above this, two versions of a note are the same note however it was edited. */
+const SAME_NOTE_ABOVE = 0.5;
+
+/**
+ * Pairs each note with the file it was generated from last time.
+ *
+ * Usually that is the file at the same slug. But the slug comes from the
+ * filename, and in Obsidian giving a note a title *is* renaming the file — so
+ * a note you have just titled arrives looking brand new, and would be dated
+ * today. Matching the leftovers on their text finds it again.
+ *
+ * Text at least half the same is the same note, whatever it is now called.
+ */
+function pairWithPrevious(published, generated) {
+  const previousFor = new Map();
+  const orphans = new Map(generated);
+
+  // Exact slug matches first, so a rename can never steal a file that a
+  // still-present note is using.
+  for (const note of published) {
+    const exact = orphans.get(note.slug);
+    if (exact) {
+      previousFor.set(note.slug, { entry: exact });
+      orphans.delete(note.slug);
+    }
+  }
+
+  for (const note of published) {
+    if (previousFor.has(note.slug)) continue;
+
+    let bestSlug = null;
+    let bestScore = 0;
+    for (const [slug, entry] of orphans) {
+      const score = similarity(entry.body, note.text);
+      if (score > bestScore) {
+        bestScore = score;
+        bestSlug = slug;
+      }
+    }
+
+    if (bestSlug !== null && bestScore >= SAME_NOTE_ABOVE) {
+      previousFor.set(note.slug, { entry: orphans.get(bestSlug), renamedFrom: bestSlug });
+      orphans.delete(bestSlug);
+    }
+  }
+
+  return { previousFor, orphans };
+}
 
 /** The moment this run is publishing. */
 const NOW = new Date();
@@ -186,41 +232,40 @@ const today = isoDate(NOW);
  * it sees that moment directly rather than inferring it from the filesystem,
  * whose timestamps a restore or a sync can rewrite.
  *
- * Once published the date is fixed, so editing a note does not shuffle it to
- * the top of the page. Two things override that: `date` in the vault frontmatter
- * pins it for good, and a rewrite substantial enough to make it a different
- * note re-dates it to now.
+ * Once published the date is fixed. Editing the note does not move it, nor
+ * does titling it, nor does adding to it for a week — none of that is
+ * publishing. Three things set a date: `date` in the vault frontmatter pins
+ * it for good, `published` carries the moment it went out from the phone, and
+ * ticking draft then unticking it publishes the note again from scratch.
  */
 function resolveDate(note, previous) {
-  if (note.pinned) return { date: note.pinned, why: null };
+  if (note.pinned) return note.pinned;
   // Published from the phone — that moment is the publish, however long the
   // note then sat waiting for this machine to come online and collect it.
-  if (note.at) return { date: isoDate(note.at), why: null };
-  if (!previous?.date) return { date: today, why: null };
-
-  const score = similarity(previous.body, note.text);
-  if (score < REWRITE_BELOW) {
-    return { date: today, why: `rewritten (${Math.round(score * 100)}% of the old text)` };
-  }
-  return { date: previous.date, why: null };
+  if (note.at) return isoDate(note.at);
+  // Already out. Editing it — a word, a title, ten more paragraphs — is not
+  // publishing it again, so the date stands. To deliberately re-date a note,
+  // tick draft and untick it: that takes it off the site and publishes it
+  // afresh, which is the one thing that means "this is new now".
+  if (previous?.date) return previous.date;
+  return today;
 }
 
 const { published, skipped } = await collect();
 const generated = await existingGenerated();
 
+const { previousFor, orphans } = pairWithPrevious(published, generated);
+
 let written = 0;
 for (const note of published) {
-  const previous = generated.get(note.slug);
-  const { date, why } = resolveDate(note, previous);
+  const match = previousFor.get(note.slug);
+  const previous = match?.entry;
+  const date = resolveDate(note, previous);
 
   // Within a day, notes order by when they were published. A note keeps its
-  // order once published; a re-dated rewrite moves to now. A phone note orders
-  // by its own stamp, so it lands at the hour it was actually written.
-  const order = note.at
-    ? note.at.valueOf()
-    : why
-      ? Date.now()
-      : previous?.order ?? NOW.valueOf();
+  // order for as long as it stays published. A phone note orders by its own
+  // stamp, so it lands at the hour it was actually written.
+  const order = note.at ? note.at.valueOf() : previous?.order ?? NOW.valueOf();
 
   // The display time is fixed here, in this machine's timezone, because the
   // production build runs in UTC and would shift it.
@@ -241,14 +286,26 @@ for (const note of published) {
   if (current !== next) {
     if (!dryRun) await writeFile(target, next, 'utf-8');
     console.log(`  ${current === null ? '+' : '~'} ${note.slug}`);
-    if (why) console.log(`      re-dated to ${date} — ${why}`);
+    if (match?.renamedFrom) {
+      console.log(`      renamed from "${match.renamedFrom}" — kept its ${date} date`);
+    }
     written++;
   }
-  generated.delete(note.slug);
+
+  // A renamed note is written under its new slug, so the file it used to live
+  // in has to go. It was claimed above rather than left to the sweep below —
+  // that is what kept its date — so nothing else will remove it, and the site
+  // would carry the note twice, once under each name.
+  const stale = match?.renamedFrom ? match.entry.file : null;
+  if (stale && stale !== `${note.slug}.md`) {
+    if (!dryRun) await unlink(join(OUT, stale));
+    console.log(`      removed ${stale}`);
+  }
 }
 
 // Anything we generated before and is no longer flagged gets pulled down.
-for (const [slug, entry] of generated) {
+// A note that was merely renamed is not in here — it was claimed above.
+for (const [slug, entry] of orphans) {
   if (!dryRun) await unlink(join(OUT, entry.file));
   console.log(`  - ${slug} (no longer published)`);
 }
@@ -257,5 +314,5 @@ for (const name of skipped) console.log(`  · "${name}" is a draft`);
 
 console.log(
   `\n${published.length} published · ${skipped.length} held back · ` +
-    `${written} changed · ${generated.size} removed${dryRun ? '  [dry run]' : ''}`
+    `${written} changed · ${orphans.size} removed${dryRun ? '  [dry run]' : ''}`
 );
