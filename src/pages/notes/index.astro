@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { formatDate } from '../../lib/dates';
 
@@ -15,16 +15,16 @@ const notes = all.sort(
     a.id.localeCompare(b.id)
 );
 
-// Group by date, newest first. A note's index paragraphs come from its raw body.
-type Card = { id: string; time?: string; paragraphs: string[] };
+// Group by date, newest first. Notes are short enough to sit on the index in
+// full, so each card renders the note itself — through the same markdown
+// pipeline as its own page, or the index would show the asterisks around an
+// italic rather than the italic.
+type Card = { id: string; time?: string; Content: Awaited<ReturnType<typeof render>>['Content'] };
 const groups: { date: Date; notes: Card[] }[] = [];
 for (const note of notes) {
   const key = note.data.date.valueOf();
-  const paragraphs = (note.body ?? '')
-    .trim()
-    .split(/\n\s*\n/)
-    .filter(Boolean);
-  const card = { id: note.id, time: note.data.time, paragraphs };
+  const { Content } = await render(note);
+  const card = { id: note.id, time: note.data.time, Content };
   const group = groups.find((g) => g.date.valueOf() === key);
   if (group) {
     group.notes.push(card);
@@ -51,9 +51,7 @@ for (const note of notes) {
               {group.notes.map((note) => (
                 <a href={`/notes/${note.id}`} class="note-card">
                   {note.time && <div class="note-time">{note.time}</div>}
-                  {note.paragraphs.map((p) => (
-                    <div>{p}</div>
-                  ))}
+                  <div class="note-card-body"><note.Content /></div>
                 </a>
               ))}
             </div>

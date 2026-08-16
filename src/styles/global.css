@@ -254,6 +254,28 @@ a:hover {
   color: #111;
 }
 
+/* The card used to space its paragraphs with its own flex gap, back when each
+   was a bare div. They are real markdown blocks now, so the spacing lives
+   here — same 14px, so nothing on the page moved. */
+.note-card-body > * {
+  margin: 0;
+}
+
+.note-card-body > * + * {
+  margin-top: 14px;
+}
+
+.note-card-body blockquote {
+  padding-left: 14px;
+  border-left: 1px solid #ddd;
+  color: #555;
+}
+
+.note-card-body ul,
+.note-card-body ol {
+  padding-left: 22px;
+}
+
 /* The clock time a note was written, at the top of its card. It shares the
    card's 14px gap below, so it reads as a header rather than a paragraph. */
 .note-time {
