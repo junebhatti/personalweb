@@ -265,10 +265,16 @@ a:hover {
   margin-top: 14px;
 }
 
-.note-card-body blockquote {
-  padding-left: 14px;
-  border-left: 1px solid #ddd;
-  color: #555;
+/* A quote inside a note is part of the note, not an aside pulled out of it —
+   same ink, same left edge as the paragraph above. The italics carry it, so
+   it needs no rule and no indent. (Essays keep the quieter treatment; a quote
+   in a long piece really is set apart from the argument around it.) */
+.note-card-body blockquote,
+.note-body blockquote {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
 }
 
 .note-card-body ul,
@@ -745,7 +751,8 @@ a:hover {
   margin: 0 0 18px;
 }
 
-.note-body p {
+.note-body p,
+.note-body blockquote {
   margin: 0 0 16px;
 }
 
