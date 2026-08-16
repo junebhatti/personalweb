@@ -1,14 +1,14 @@
 ---
 date: 2026-08-15
-order: 1786860776809
-time: 11:12 PM
+order: 1786861088834
+time: 11:18 PM
 source: obsidian
 ---
 
-<em>"Do you take pride in your hurt? Does it make you seem large and tragic? ...Well, think about it. Maybe you're playing a part on a great stage with only yourself as audience."</em>
+"𝘋𝘰 𝘺𝘰𝘶 𝘵𝘢𝘬𝘦 𝘱𝘳𝘪𝘥𝘦 𝘪𝘯 𝘺𝘰𝘶𝘳 𝘩𝘶𝘳𝘵? 𝘋𝘰𝘦𝘴 𝘪𝘵 𝘮𝘢𝘬𝘦 𝘺𝘰𝘶 𝘴𝘦𝘦𝘮 𝘭𝘢𝘳𝘨𝘦 𝘢𝘯𝘥 𝘵𝘳𝘢𝘨𝘪𝘤? ...𝘞𝘦𝘭𝘭, 𝘵𝘩𝘪𝘯𝘬 𝘢𝘣𝘰𝘶𝘵 𝘪𝘵. 𝘔𝘢𝘺𝘣𝘦 𝘺𝘰𝘶'𝘳𝘦 𝘱𝘭𝘢𝘺𝘪𝘯𝘨 𝘢 𝘱𝘢𝘳𝘵 𝘰𝘯 𝘢 𝘨𝘳𝘦𝘢𝘵 𝘴𝘵𝘢𝘨𝘦 𝘸𝘪𝘵𝘩 𝘰𝘯𝘭𝘺 𝘺𝘰𝘶𝘳𝘴𝘦𝘭𝘧 𝘢𝘴 𝘢𝘶𝘥𝘪𝘦𝘯𝘤𝘦."
 
 — John Steinbeck
 
-<em>"Why should we feel anger at the world? As if the world would notice."</em>
+"𝘞𝘩𝘺 𝘴𝘩𝘰𝘶𝘭𝘥 𝘸𝘦 𝘧𝘦𝘦𝘭 𝘢𝘯𝘨𝘦𝘳 𝘢𝘵 𝘵𝘩𝘦 𝘸𝘰𝘳𝘭𝘥? 𝘈𝘴 𝘪𝘧 𝘵𝘩𝘦 𝘸𝘰𝘳𝘭𝘥 𝘸𝘰𝘶𝘭𝘥 𝘯𝘰𝘵𝘪𝘤𝘦."
 
 — Marcus Aurelius
