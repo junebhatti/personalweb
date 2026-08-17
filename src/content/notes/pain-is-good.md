@@ -11,4 +11,4 @@ pain is good. pain is necessary. pain is uncomfortable. it's not only physical, 
 
  *"I think that if you don't experience real fear from time to time, you don't experience real danger and other things, then your mind just creates fears out of nothing," Alex Honnold*
 
-pain, fear, and anxiety are invaluable to a strong mind. the physical world is the best place to train for fear and pain; that way
+pain, fear, and anxiety are invaluable to a strong mind. the physical world is the best place to train for fear and pain; that way the manmade cons
