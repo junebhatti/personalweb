@@ -94,10 +94,21 @@ async function collect() {
 
   const published = [];
   const skipped = [];
+  const unreadable = [];
 
   for (const entry of entries.filter((e) => e.endsWith('.md'))) {
     const path = join(VAULT, entry);
-    const raw = await readFile(path, 'utf-8');
+    // iCloud can evict a note to the cloud ("Optimize Mac Storage"), and a
+    // read of the dataless file can fail (EDEADLK / error -35). One evicted
+    // note must not take the whole sync down — or worse, unpublish the note.
+    let raw;
+    try {
+      raw = await readFile(path, 'utf-8');
+    } catch (err) {
+      console.warn(`  ! "${entry}" could not be read (${err.code ?? err.errno ?? err.message}) — keeping its published copy, if any`);
+      unreadable.push(basename(entry, '.md'));
+      continue;
+    }
     const { data, body } = parseFrontmatter(raw);
     const name = basename(entry, '.md');
 
@@ -127,7 +138,7 @@ async function collect() {
     });
   }
 
-  return { published, skipped };
+  return { published, skipped, unreadable };
 }
 
 async function existingGenerated() {
@@ -251,10 +262,20 @@ function resolveDate(note, previous) {
   return today;
 }
 
-const { published, skipped } = await collect();
+const { published, skipped, unreadable } = await collect();
 const generated = await existingGenerated();
 
 const { previousFor, orphans } = pairWithPrevious(published, generated);
+
+// A note that could not be read is unreadable, not unpublished — leave its
+// generated file alone rather than sweeping it away as an orphan.
+for (const name of unreadable) {
+  const slug = slugify(name);
+  if (orphans.has(slug)) {
+    console.warn(`  ! keeping ${slug} — its vault note is unreadable, not gone`);
+    orphans.delete(slug);
+  }
+}
 
 let written = 0;
 for (const note of published) {
