@@ -46,6 +46,11 @@ export const categories: Category[] = [
             when: 'summer 2025',
             note: 'an epic novella about chess, showcasing the power of the mind',
           },
+          {
+            title: 'East of Eden',
+            by: 'John Steinbeck',
+            note: 'so much social commentary, exploration of the human',
+          },
         ],
       },
     ],
