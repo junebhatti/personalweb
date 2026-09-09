@@ -5,4 +5,6 @@ time: 4:19 AM
 source: obsidian
 ---
 
-environment is actually everything (people). the right people around you will pull out the right parts of you. unlocking your true self happens when those around you are emitting authenticity and honesty. this is the key to a healthy, fulfilling lifestyle.
+an important characteristic that i really admire in people, who invariably happen to be successful and or interesting, is the ability to create, hold, and nurture conversations. those who can guide it, story tell, ask questions. when silence is filled by another interesting perspective or insight, and you can't help but want to hear more. 
+
+i think it's heavily influenced by authentic intellectual curiosity. <--- something i'm striving for.
