@@ -20,7 +20,7 @@ import { join } from 'node:path';
 
 const VAULT =
   process.env.OBSIDIAN_NOTES_DIR ??
-  '/Users/junaid/Documents/Obsidian/Junaid/junaidb/Writing/Brain Dump';
+  '/Users/junaid/Obsidian/junaidb/Writing/Brain Dump';
 
 const URL_BASE = process.env.SUPABASE_URL ?? '';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY ?? '';

@@ -9,7 +9,7 @@
 set -uo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VAULT="${OBSIDIAN_NOTES_DIR:-/Users/junaid/Documents/Obsidian/Junaid/junaidb/Writing/Brain Dump}"
+VAULT="${OBSIDIAN_NOTES_DIR:-/Users/junaid/Obsidian/junaidb/Writing/Brain Dump}"
 export PATH="/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 cd "$REPO" || exit 1

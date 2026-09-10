@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 
 const VAULT =
   process.env.OBSIDIAN_NOTES_DIR ??
-  '/Users/junaid/Documents/Obsidian/Junaid/junaidb/Writing/Brain Dump';
+  '/Users/junaid/Obsidian/junaidb/Writing/Brain Dump';
 
 const OUT = fileURLToPath(new URL('../src/content/notes/', import.meta.url));
 

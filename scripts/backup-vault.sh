@@ -9,7 +9,7 @@
 
 set -uo pipefail
 
-VAULT="${OBSIDIAN_VAULT:-/Users/junaid/Documents/Obsidian/Junaid/junaidb}"
+VAULT="${OBSIDIAN_VAULT:-/Users/junaid/Obsidian/junaidb}"
 BACKUP="${OBSIDIAN_BACKUP:-$HOME/Library/Application Support/obsidian-vault-backup}"
 export PATH="/opt/homebrew/bin:/usr/bin:/bin"
 
