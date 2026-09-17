@@ -5,4 +5,4 @@ time: 1:07 AM
 source: obsidian
 ---
 
-Maybe all you need is to look at the conscious as some big brother (1984) omnipotent surveillance of our physical states. use it to criticize habits, impulses, feelings. guilting yourself to be better.
+Maybe all you need is to look at the conscious as some big brother (1984) omnipotent surveillance of our physical and mental states. use it to criticize habits, impulses, feelings. guilting yourself to be better.
