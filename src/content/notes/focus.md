@@ -6,3 +6,5 @@ source: obsidian
 ---
 
 focus is a superpower. but how do you train focus without focus? lower the barrier to entry by 100x. design it into everything. identify with it.
+
+and focus doesn't have to mean producti
