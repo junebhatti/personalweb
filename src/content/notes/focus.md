@@ -7,4 +7,4 @@ source: obsidian
 
 focus is a superpower. but how do you train focus without focus? lower the barrier to entry by 100x. design it into everything. identify with it.
 
-and focus doesn't have to mean productivity in a material or intellectual way. just working towards what you want in live with conviction
+and focus doesn't have to mean productivity in a material or intellectual way. just working towards what you want in life with conviction
