@@ -9,4 +9,4 @@ identity is genuinely the most durable form of intrinsic drive + motivation. If 
 
 The negation: "I'm not good at math." then when a problem feels impossible, I resort to AI, copying answers, not thinking through the solution; when I could have asked real questions, read the textbook. Negative identity gives me a reason to quit without friction.
 
-There's a barrier of fight that sort of comes with positive identity. I want to fight harder for what I believe I am. I'm defending it something worth
+There's a barrier of fight that sort of comes with positive identity. I want to fight harder for what I believe I am. I'm defending it something worthwhile.
