@@ -5,4 +5,4 @@ time: 1:23 PM
 source: obsidian
 ---
 
-something very revealing and romantic to converse with someone else's art
+something very revealing and romantic to engage with someone else's art
