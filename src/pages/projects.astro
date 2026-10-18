@@ -6,15 +6,27 @@ interface Project {
   description: string;
   /** Optional — a title without one renders as plain text in the same style. */
   href?: string;
+  /** Optional — link only this part of the title instead of the whole thing. */
+  linkText?: string;
+}
+
+/** Splits a title around its linkText, failing the build if it isn't in the title. */
+function splitTitle(project: Project): [string, string] {
+  const i = project.title.indexOf(project.linkText!);
+  if (i === -1) {
+    throw new Error(`linkText "${project.linkText}" not found in title "${project.title}"`);
+  }
+  return [project.title.slice(0, i), project.title.slice(i + project.linkText!.length)];
 }
 
 /** Things in progress or just ideas right now — no year, they aren't done. */
 const current: Project[] = [
   {
-    title: 'Growth Strategy at Novig',
+    title: 'Growth & Strategy at Novig',
     description:
       'Interning on the growth team at Novig during the fall semester; vibe coding, learning, building.',
     href: 'https://novig.com',
+    linkText: 'Novig',
   },
 ];
 
@@ -59,7 +71,13 @@ const years: { year: string; projects: Project[] }[] = [
             <div class="entries project-entries">
               {current.map((project) => (
                 <div class="entry">
-                  {project.href ? (
+                  {project.href && project.linkText ? (
+                    <span class="entry-title entry-title-plain">
+                      {splitTitle(project)[0]}
+                      <a href={project.href} target="_blank" rel="noopener">{project.linkText}</a>
+                      {splitTitle(project)[1]}
+                    </span>
+                  ) : project.href ? (
                     <a href={project.href} target="_blank" rel="noopener" class="entry-title">
                       {project.title}
                     </a>
@@ -79,7 +97,13 @@ const years: { year: string; projects: Project[] }[] = [
             <div class="entries project-entries">
               {group.projects.map((project) => (
                 <div class="entry">
-                  {project.href ? (
+                  {project.href && project.linkText ? (
+                    <span class="entry-title entry-title-plain">
+                      {splitTitle(project)[0]}
+                      <a href={project.href} target="_blank" rel="noopener">{project.linkText}</a>
+                      {splitTitle(project)[1]}
+                    </span>
+                  ) : project.href ? (
                     <a href={project.href} target="_blank" rel="noopener" class="entry-title">
                       {project.title}
                     </a>

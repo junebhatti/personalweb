@@ -152,6 +152,11 @@ a:hover {
   color: #111;
 }
 
+/* A link inside an otherwise plain title — only part of it is clickable. */
+.entry-title a {
+  text-decoration: none;
+}
+
 /* --- Projects: one year heading per group, smaller entries --- */
 
 .section-label-lg {
