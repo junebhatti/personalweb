@@ -9,7 +9,14 @@ interface Project {
 }
 
 /** Things in progress or just ideas right now — no year, they aren't done. */
-const current: Project[] = [];
+const current: Project[] = [
+  {
+    title: 'Growth Strategy at Novig',
+    description:
+      'Interning on the growth team at Novig during the fall semester; vibe coding, learning, building.',
+    href: 'https://novig.com',
+  },
+];
 
 /** Finished work, grouped under one year heading per group. */
 const years: { year: string; projects: Project[] }[] = [
