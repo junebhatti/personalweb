@@ -16,7 +16,7 @@ notes are live. Remaining:
 
 ## 2. Projects
 
-Done — Personal Dashboard, PodNotes, and this website are in
+Done — Half-Life, Personal Dashboard, PodNotes, and this website are in
 `src/pages/projects.astro`. Remaining:
 
 - [ ] Years are all "2026" from folder dates — correct any that are wrong
