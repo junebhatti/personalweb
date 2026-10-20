@@ -28,12 +28,17 @@ const current: Project[] = [
     href: 'https://novig.com',
     linkText: 'Novig',
   },
+  {
+    title: 'This website',
+    description: 'A portfolio for writing and interests.',
+    href: 'https://junaidrbhatti.com',
+  },
 ];
 
-/** Finished work, grouped under one year heading per group. */
-const years: { year: string; projects: Project[] }[] = [
+/** Finished work, grouped under one season heading per group, newest first. */
+const seasons: { season: string; projects: Project[] }[] = [
   {
-    year: '2026',
+    season: 'Fall 2026',
     projects: [
       {
         title: 'NYC Turnover',
@@ -41,20 +46,25 @@ const years: { year: string; projects: Project[] }[] = [
           'I love food. I also got curious about NYC restaurants, cafés, and bars as an asset class – which spots last, which flip constantly, and what the rent has to do with it. So I built an interactive atlas where you can trace each storefront’s lifecycle.',
         href: 'https://half-life-nyc.vercel.app',
       },
+    ],
+  },
+  {
+    season: 'Summer 2026',
+    projects: [
       {
         title: 'Personal Dashboard',
         description:
           'Built a website and mobile app that encompasses all my personal data — tasks, calendars, health data, food tracking, project managing, notes, flashcards, etc.',
       },
+    ],
+  },
+  {
+    season: 'Spring 2026',
+    projects: [
       {
         title: 'PodNotes',
         description:
           'A personal app that pulls the currently playing Spotify podcast and acts as a centralized location for taking notes on podcasts.',
-      },
-      {
-        title: 'This website',
-        description: 'A portfolio for writing and interests.',
-        href: 'https://junaidrbhatti.com',
       },
     ],
   },
@@ -68,11 +78,11 @@ const years: { year: string; projects: Project[] }[] = [
     </div>
 
     <div class="content">
-      <div class="section-label section-label-lg">Things I've built</div>
+      <div class="section-label">Things I've built</div>
 
       <div class="project-groups">
         <div class="project-group">
-          <div class="project-year">current</div>
+          <div class="project-year">Current</div>
           {current.length > 0 && (
             <div class="entries project-entries">
               {current.map((project) => (
@@ -97,9 +107,9 @@ const years: { year: string; projects: Project[] }[] = [
           )}
         </div>
 
-        {years.map((group) => (
+        {seasons.map((group) => (
           <div class="project-group">
-            <div class="project-year">{group.year}</div>
+            <div class="project-year">{group.season}</div>
             <div class="entries project-entries">
               {group.projects.map((project) => (
                 <div class="entry">

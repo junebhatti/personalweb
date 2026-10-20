@@ -157,40 +157,43 @@ a:hover {
   text-decoration: none;
 }
 
-/* --- Projects: one year heading per group, smaller entries --- */
-
-.section-label-lg {
-  font-size: 17px;
-}
+/* --- Projects: one season heading per group, compact entries --- */
 
 .project-groups {
   display: flex;
   flex-direction: column;
-  gap: 44px;
+  gap: 48px;
+  max-width: 640px;
 }
 
 .project-year {
-  font-size: 15px;
+  font-size: 13px;
   color: #888;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #eee;
   padding-bottom: 8px;
 }
 
 .project-year + .project-entries {
-  margin-top: 24px;
+  margin-top: 20px;
 }
 
 .project-entries {
-  gap: 26px;
+  gap: 24px;
+}
+
+.project-entries .entry {
+  gap: 4px;
 }
 
 .project-entries .entry-title {
-  font-size: clamp(18px, 1.8vw, 21px);
+  font-size: 17px;
+  letter-spacing: -0.01em;
 }
 
 .project-entries .entry-desc {
   font-size: 15px;
   line-height: 1.5;
+  color: #666;
 }
 
 /* Video entries lead with a thumbnail; the date/title below match Writing. */
