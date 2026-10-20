@@ -4,10 +4,12 @@ import Base from '../layouts/Base.astro';
 interface Project {
   title: string;
   description: string;
-  /** Optional — a title without one renders as plain text in the same style. */
+  /** Optional — shown as a "Link ↗" under the description. */
   href?: string;
-  /** Optional — link only this part of the title instead of the whole thing. */
+  /** Optional — link only this part of the title instead of adding a "Link ↗" row. */
   linkText?: string;
+  /** YYYY-MM-DD when it shipped. Leave out for things still in progress. */
+  date?: string;
 }
 
 /** Splits a title around its linkText, failing the build if it isn't in the title. */
@@ -19,8 +21,16 @@ function splitTitle(project: Project): [string, string] {
   return [project.title.slice(0, i), project.title.slice(i + project.linkText!.length)];
 }
 
-/** This season's work, including things still in progress. */
-const current: Project[] = [
+/** "2026-10-19" → "10/19/26", failing the build on anything else. */
+function formatDate(date: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+  if (!match) throw new Error(`Project date "${date}" isn't YYYY-MM-DD`);
+  const [, year, month, day] = match;
+  return `${month}/${day}/${year.slice(2)}`;
+}
+
+/** In-progress work first (shown as "current"), then finished work newest first. */
+const projects: Project[] = [
   {
     title: 'Growth & Strategy at Novig',
     description:
@@ -29,39 +39,28 @@ const current: Project[] = [
     linkText: 'Novig',
   },
   {
+    title: 'This website',
+    description: 'A portfolio for writing and interests.',
+    href: 'https://junaidrbhatti.com',
+  },
+  {
     title: 'NYC Turnover',
+    date: '2026-10-19',
     description:
       'I love food. I also got curious about NYC restaurants, cafés, and bars as an asset class – which spots last, which flip constantly, and what the rent has to do with it. So I built an interactive atlas where you can trace each storefront’s lifecycle.',
     href: 'https://half-life-nyc.vercel.app',
   },
   {
-    title: 'This website',
-    description: 'A portfolio for writing and interests.',
-    href: 'https://junaidrbhatti.com',
-  },
-];
-
-/** Finished work, grouped under one season heading per group, newest first. */
-const seasons: { season: string; projects: Project[] }[] = [
-  {
-    season: 'Summer 2026',
-    projects: [
-      {
-        title: 'Personal Dashboard',
-        description:
-          'Built a website and mobile app that encompasses all my personal data — tasks, calendars, health data, food tracking, project managing, notes, flashcards, etc.',
-      },
-    ],
+    title: 'Personal Dashboard',
+    date: '2026-07-15',
+    description:
+      'Built a website and mobile app that encompasses all my personal data — tasks, calendars, health data, food tracking, project managing, notes, flashcards, etc.',
   },
   {
-    season: 'Spring 2026',
-    projects: [
-      {
-        title: 'PodNotes',
-        description:
-          'A personal app that pulls the currently playing Spotify podcast and acts as a centralized location for taking notes on podcasts.',
-      },
-    ],
+    title: 'PodNotes',
+    date: '2026-04-21',
+    description:
+      'A personal app that pulls the currently playing Spotify podcast and acts as a centralized location for taking notes on podcasts.',
   },
 ];
 ---
@@ -75,56 +74,29 @@ const seasons: { season: string; projects: Project[] }[] = [
     <div class="content">
       <div class="section-label">Things I've built</div>
 
-      <div class="project-groups">
-        <div class="project-group">
-          <div class="project-year">Fall 2026 · current</div>
-          {current.length > 0 && (
-            <div class="entries project-entries">
-              {current.map((project) => (
-                <div class="entry">
-                  {project.href && project.linkText ? (
-                    <span class="entry-title entry-title-plain">
-                      {splitTitle(project)[0]}
-                      <a href={project.href} target="_blank" rel="noopener">{project.linkText}</a>
-                      {splitTitle(project)[1]}
-                    </span>
-                  ) : project.href ? (
-                    <a href={project.href} target="_blank" rel="noopener" class="entry-title">
-                      {project.title}
-                    </a>
-                  ) : (
-                    <span class="entry-title entry-title-plain">{project.title}</span>
-                  )}
-                  <div class="entry-desc">{project.description}</div>
-                </div>
-              ))}
+      <div class="project-list">
+        {projects.map((project) => (
+          <div class="project">
+            <div class="project-head">
+              <span class="project-title">
+                {project.linkText ? (
+                  <>
+                    {splitTitle(project)[0]}
+                    <a href={project.href} target="_blank" rel="noopener">{project.linkText}</a>
+                    {splitTitle(project)[1]}
+                  </>
+                ) : (
+                  project.title
+                )}
+              </span>
+              <span class="project-date">{project.date ? formatDate(project.date) : 'current'}</span>
             </div>
-          )}
-        </div>
-
-        {seasons.map((group) => (
-          <div class="project-group">
-            <div class="project-year">{group.season}</div>
-            <div class="entries project-entries">
-              {group.projects.map((project) => (
-                <div class="entry">
-                  {project.href && project.linkText ? (
-                    <span class="entry-title entry-title-plain">
-                      {splitTitle(project)[0]}
-                      <a href={project.href} target="_blank" rel="noopener">{project.linkText}</a>
-                      {splitTitle(project)[1]}
-                    </span>
-                  ) : project.href ? (
-                    <a href={project.href} target="_blank" rel="noopener" class="entry-title">
-                      {project.title}
-                    </a>
-                  ) : (
-                    <span class="entry-title entry-title-plain">{project.title}</span>
-                  )}
-                  <div class="entry-desc">{project.description}</div>
-                </div>
-              ))}
-            </div>
+            <div class="project-desc">{project.description}</div>
+            {project.href && !project.linkText && (
+              <div class="project-links">
+                <a href={project.href} target="_blank" rel="noopener">Link&nbsp;↗</a>
+              </div>
+            )}
           </div>
         ))}
       </div>
