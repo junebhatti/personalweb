@@ -19,7 +19,7 @@ function splitTitle(project: Project): [string, string] {
   return [project.title.slice(0, i), project.title.slice(i + project.linkText!.length)];
 }
 
-/** Things in progress or just ideas right now — no year, they aren't done. */
+/** This season's work, including things still in progress. */
 const current: Project[] = [
   {
     title: 'Growth & Strategy at Novig',
@@ -27,6 +27,12 @@ const current: Project[] = [
       'Interning on the growth team at Novig during the fall semester; vibe coding, learning, building.',
     href: 'https://novig.com',
     linkText: 'Novig',
+  },
+  {
+    title: 'NYC Turnover',
+    description:
+      'I love food. I also got curious about NYC restaurants, cafés, and bars as an asset class – which spots last, which flip constantly, and what the rent has to do with it. So I built an interactive atlas where you can trace each storefront’s lifecycle.',
+    href: 'https://half-life-nyc.vercel.app',
   },
   {
     title: 'This website',
@@ -37,17 +43,6 @@ const current: Project[] = [
 
 /** Finished work, grouped under one season heading per group, newest first. */
 const seasons: { season: string; projects: Project[] }[] = [
-  {
-    season: 'Fall 2026',
-    projects: [
-      {
-        title: 'NYC Turnover',
-        description:
-          'I love food. I also got curious about NYC restaurants, cafés, and bars as an asset class – which spots last, which flip constantly, and what the rent has to do with it. So I built an interactive atlas where you can trace each storefront’s lifecycle.',
-        href: 'https://half-life-nyc.vercel.app',
-      },
-    ],
-  },
   {
     season: 'Summer 2026',
     projects: [
@@ -82,7 +77,7 @@ const seasons: { season: string; projects: Project[] }[] = [
 
       <div class="project-groups">
         <div class="project-group">
-          <div class="project-year">Current</div>
+          <div class="project-year">Fall 2026 · current</div>
           {current.length > 0 && (
             <div class="entries project-entries">
               {current.map((project) => (
