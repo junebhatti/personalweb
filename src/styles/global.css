@@ -985,10 +985,6 @@ a:hover {
   text-decoration: none;
 }
 
-.brief-nav span a + a {
-  margin-left: 16px;
-}
-
 .brief-nav-bottom {
   padding: 0 22px 48px;
 }
