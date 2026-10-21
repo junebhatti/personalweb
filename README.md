@@ -179,6 +179,24 @@ The script only ever stages `src/content/notes`, so work in progress elsewhere
 in the repo is never swept into an automatic commit. If the push fails it stops
 and says so rather than trying to resolve anything itself.
 
+## Morning Brief
+
+`/brief` shows the newest issue of the daily Morning Brief, `/brief/<date>` each
+past one, `/brief/archive` the list, and `/brief/rss.xml` a feed with full issues.
+
+Issues arrive on their own. After the Apps Script sender
+([morning-brief](https://github.com/junebhatti/morning-brief)) emails a brief,
+it commits a public copy to `src/briefs/YYYY-MM-DD.html` on `main`, and Vercel
+redeploys. The copy has the calendar and the reaction links taken out; if the
+script can't find the calendar block it publishes nothing that day. Don't edit
+these files by hand: the next commit for that date replaces them.
+
+`/r` is where the + / − / * links in the email land. It plays a short
+confirmation and posts the tap to the Apps Script web app, so it needs
+`PUBLIC_REACT_ENDPOINT` (the web app's `/exec` URL) in Vercel. Like `/draft`,
+it runs JavaScript; recording from the browser keeps mail scanners, which open
+every link, from logging fake taps.
+
 ## Course rankings
 
 Courses live in `src/data/coursework.ts` — one object each, holding the name,

@@ -1,0 +1,23 @@
+---
+import Base from '../../layouts/Base.astro';
+import BriefIssue from '../../components/BriefIssue.astro';
+import { briefs } from '../../lib/briefs';
+
+// Always the newest issue; the URL stays the same from day to day.
+const latest = briefs[0];
+---
+
+<Base title={latest ? latest.title : 'Morning Brief — Junaid Bhatti'}>
+  {latest ? (
+    <BriefIssue brief={latest} older={briefs[1]?.date} />
+  ) : (
+    <div class="page">
+      <div class="back-row">
+        <a href="/" class="back-link">&larr; back</a>
+      </div>
+      <div class="short-content">
+        <p class="brief-empty">The first Morning Brief lands here tomorrow morning.</p>
+      </div>
+    </div>
+  )}
+</Base>

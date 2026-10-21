@@ -1,0 +1,74 @@
+---
+// Where the + / − / * links in the Morning Brief email land. The page plays a
+// short confirmation and posts the tap to the brief's Apps Script, which checks
+// the link's signature (only links from my own emails count) and logs it.
+// Recording happens from the browser, not on page load, so mail scanners that
+// open every link don't log fake taps. This is the one page besides /draft
+// that runs JavaScript.
+import Base from '../layouts/Base.astro';
+
+const ENDPOINT = import.meta.env.PUBLIC_REACT_ENDPOINT ?? '';
+---
+
+<Base title="Morning Brief" noindex themeColor="#f4f5f6">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap" rel="stylesheet" />
+  <div class="react-page">
+    <div class="react-card" data-card>
+      <div class="react-mark" aria-hidden="true"><span data-symbol></span></div>
+      <div class="react-msg" data-msg role="status" aria-live="polite"></div>
+      <div class="react-sub" data-sub></div>
+      <noscript><div class="react-msg is-shown">Reactions need JavaScript.</div></noscript>
+    </div>
+  </div>
+
+  <script is:inline define:vars={{ ENDPOINT }}>
+    const p = new URLSearchParams(location.search);
+    const d = { a: p.get('a') || '', s: p.get('s') || '', u: p.get('u') || '', k: p.get('k') || '' };
+    const SHOW = {
+      more: ['+', 'More like this.'],
+      less: ['−', 'Less like this.'],
+      save: ['*', 'Saved for later.'],
+    };
+    const card = document.querySelector('[data-card]');
+    const msg = document.querySelector('[data-msg]');
+    const sub = document.querySelector('[data-sub]');
+
+    function say(text, kind) {
+      msg.textContent = text;
+      card.classList.add(kind);
+    }
+    function source() {
+      if (!/^https?:\/\//.test(d.u)) return;
+      let host = '';
+      try { host = new URL(d.u).hostname.replace(/^www\./, ''); } catch (e) { return; }
+      const a = document.createElement('a');
+      a.href = d.u;
+      a.textContent = host + ' ↗';
+      sub.appendChild(a);
+    }
+
+    const show = SHOW[d.a];
+    if (!show || !d.k) {
+      say('Nothing to record here.', 'is-error');
+    } else if (!ENDPOINT) {
+      say('Reactions aren’t set up yet.', 'is-error');
+    } else {
+      // Play the confirmation right away; the request takes a second or two.
+      document.querySelector('[data-symbol]').textContent = show[0];
+      say(show[1], 'is-done');
+      source();
+      // text/plain keeps this a "simple" request, so Apps Script needs no CORS preflight.
+      fetch(ENDPOINT, { method: 'POST', body: JSON.stringify(d) })
+        .then((r) => r.json())
+        .then((res) => {
+          if (res && res.ok) return;
+          card.classList.remove('is-done');
+          say('That link isn’t valid.', 'is-error');
+        })
+        .catch(() => {
+          card.classList.remove('is-done');
+          say('Couldn’t save that. Try the link again in a minute.', 'is-error');
+        });
+    }
+  </script>
+</Base>

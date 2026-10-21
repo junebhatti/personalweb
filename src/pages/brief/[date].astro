@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import BriefIssue from '../../components/BriefIssue.astro';
+import { briefs } from '../../lib/briefs';
+
+export function getStaticPaths() {
+  // briefs is newest first, so the next entry is the older issue.
+  return briefs.map((brief, i) => ({
+    params: { date: brief.date },
+    props: { brief, older: briefs[i + 1]?.date, newer: briefs[i - 1]?.date },
+  }));
+}
+
+const { brief, older, newer } = Astro.props;
+---
+
+<Base title={brief.title}>
+  <BriefIssue brief={brief} older={older} newer={newer} />
+</Base>

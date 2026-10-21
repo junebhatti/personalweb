@@ -962,3 +962,190 @@ a:hover {
   color: #d3d9ef;
   margin: 0;
 }
+
+/* --- Morning Brief (/brief) --- */
+
+/* The issue is the email itself, gray page and all, so the nav sits on the
+   same gray and the brief's own inline styles do the rest. */
+.brief-page {
+  min-height: 100vh;
+  background: #f4f5f6;
+}
+
+.brief-nav {
+  max-width: 724px;
+  margin: 0 auto;
+  padding: 24px 22px 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+}
+
+.brief-nav a {
+  text-decoration: none;
+}
+
+.brief-nav span a + a {
+  margin-left: 16px;
+}
+
+.brief-nav-bottom {
+  padding: 0 22px 48px;
+}
+
+/* The email's top padding was for an inbox; under the nav it's too much. */
+.brief-issue > table > tbody > tr > td,
+.brief-issue > table > tr > td {
+  padding-top: 20px !important;
+}
+
+.brief-empty,
+.brief-about {
+  font-size: 17px;
+  line-height: 1.55;
+  color: #555;
+  margin: 0;
+  max-width: 560px;
+}
+
+.brief-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.brief-list a {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-decoration: none;
+}
+
+.brief-list-date {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: #888;
+}
+
+.brief-list-hook {
+  font-size: 19px;
+  line-height: 1.35;
+}
+
+/* --- Reaction page (/r) --- */
+
+/* Matches the brief: same gray, same blue. The mark pops in, a ring spreads
+   out behind it, then the words rise into place. */
+.react-page {
+  min-height: 100vh;
+  background: #f4f5f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 28px;
+}
+
+.react-card {
+  text-align: center;
+  max-width: 420px;
+}
+
+.react-mark {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  background: #2a5cda;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  line-height: 1;
+  transform: scale(0);
+}
+
+.react-mark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid #2a5cda;
+  opacity: 0;
+}
+
+.react-msg {
+  font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  font-size: 34px;
+  line-height: 1.2;
+  color: #111315;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.react-sub {
+  margin-top: 14px;
+  font-size: 14px;
+  opacity: 0;
+}
+
+.react-sub a {
+  color: #62676e;
+  text-decoration: none;
+}
+
+.is-done .react-mark {
+  animation: react-pop 520ms cubic-bezier(0.2, 1.5, 0.4, 1) forwards;
+}
+
+.is-done .react-mark::after {
+  animation: react-ring 900ms 120ms ease-out;
+}
+
+.is-done .react-msg,
+.is-error .react-msg,
+.react-msg.is-shown {
+  animation: react-rise 420ms 180ms ease-out forwards;
+}
+
+.is-done .react-sub {
+  animation: react-rise 420ms 320ms ease-out forwards;
+}
+
+.is-error .react-mark {
+  display: none;
+}
+
+.is-error .react-msg {
+  font-size: 26px;
+  color: #62676e;
+}
+
+@keyframes react-pop {
+  to { transform: scale(1); }
+}
+
+@keyframes react-ring {
+  from { opacity: 0.6; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.9); }
+}
+
+@keyframes react-rise {
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-done .react-mark,
+  .is-done .react-sub,
+  .is-done .react-msg,
+  .is-error .react-msg,
+  .react-msg.is-shown {
+    transform: none;
+    opacity: 1;
+    animation: none !important;
+  }
+}

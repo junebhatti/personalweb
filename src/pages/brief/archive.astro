@@ -1,0 +1,29 @@
+---
+import Base from '../../layouts/Base.astro';
+import { briefs, briefDate } from '../../lib/briefs';
+---
+
+<Base title="Morning Brief archive — Junaid Bhatti">
+  <div class="page">
+    <div class="back-row">
+      <a href="/brief" class="back-link">&larr; today&rsquo;s brief</a>
+    </div>
+    <div class="list-content">
+      <p class="brief-about">
+        A short daily read I get each morning: the world and why, markets, essays, and something to
+        build. Follow along with <a href="/brief/rss.xml">RSS</a>.
+      </p>
+      {briefs.length === 0 && <p class="brief-empty">No issues yet.</p>}
+      <ul class="brief-list">
+        {briefs.map((b) => (
+          <li>
+            <a href={`/brief/${b.date}`}>
+              <span class="brief-list-date">{briefDate(b.date)}</span>
+              <span class="brief-list-hook" set:html={b.hook} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</Base>
