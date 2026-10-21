@@ -31,7 +31,11 @@ export const briefs: Brief[] = Object.entries(files)
     const head =
       (html.match(/<link [^>]*fonts\.googleapis\.com[^>]*>/)?.[0] ?? '') +
       (html.match(/<style>[\s\S]*?<\/style>/)?.[0] ?? '');
-    const body = html.match(/<body[^>]*>([\s\S]*)<\/body>/)?.[1] ?? '';
+    // Pinterest images show as plain pictures here; only the emailed copy links to the pins.
+    const body = (html.match(/<body[^>]*>([\s\S]*)<\/body>/)?.[1] ?? '').replace(
+      /<a [^>]*href="https:\/\/(?:www\.)?pinterest\.com\/[^"]*"[^>]*>\s*(<img [^>]*>)\s*<\/a>/g,
+      '$1'
+    );
     return { date, title, hook, head, body };
   })
   .filter((b) => b.date && b.body)
