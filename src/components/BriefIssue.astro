@@ -1,0 +1,31 @@
+---
+// One Morning Brief issue, shown as it looked in the email, under a small nav.
+import type { Brief } from '../lib/briefs';
+
+interface Props {
+  brief: Brief;
+  /** Older and newer issue dates, for the links under the brief. */
+  older?: string;
+  newer?: string;
+}
+
+const { brief, older, newer } = Astro.props;
+---
+
+<div class="brief-page">
+  <Fragment set:html={brief.head} />
+  <nav class="brief-nav">
+    <a href="/">&larr; back</a>
+    <span>
+      <a href="/brief/archive">archive</a>
+      <a href="/brief/rss.xml">rss</a>
+    </span>
+  </nav>
+  <div class="brief-issue">
+    <Fragment set:html={brief.body} />
+  </div>
+  <nav class="brief-nav brief-nav-bottom">
+    {older ? <a href={`/brief/${older}`}>&larr; older</a> : <span />}
+    {newer ? <a href={`/brief/${newer}`}>newer &rarr;</a> : <span />}
+  </nav>
+</div>
