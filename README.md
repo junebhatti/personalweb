@@ -182,7 +182,8 @@ and says so rather than trying to resolve anything itself.
 ## Morning Brief
 
 `/brief` shows the newest issue of the daily Morning Brief, `/brief/<date>` each
-past one, `/brief/archive` the list, and `/brief/rss.xml` a feed with full issues.
+past one, and `/brief/archive` the list. `/brief/rss.xml` is a feed with full issues;
+nothing links to it, but it keeps working for anyone given the address.
 
 Issues arrive on their own. After the Apps Script sender
 ([morning-brief](https://github.com/junebhatti/morning-brief)) emails a brief,
