@@ -6,8 +6,10 @@ interface Project {
   description: string;
   /** Optional — shown as a "Link ↗" under the description. */
   href?: string;
-  /** Optional — link only this part of the title instead of adding a "Link ↗" row. */
+  /** Optional — link this part of the title (or all of it) instead of adding a link row. */
   linkText?: string;
+  /** Optional — text for the link row in place of "Link ↗". */
+  linkLabel?: string;
   /** YYYY-MM-DD when it shipped. Leave out for things still in progress. */
   date?: string;
 }
@@ -42,12 +44,14 @@ const projects: Project[] = [
     title: 'This website',
     description: 'A portfolio for writing and interests.',
     href: 'https://junaidrbhatti.com',
+    linkText: 'This website',
   },
   {
     title: 'Personal Newsletter',
     description:
       "I got sick of subscribing, getting spammed, and parsing 5-10 newsletters, so I built my own that builds my taste over time and directs me to some people/ideas I'm interested in currently.",
     href: '/brief',
+    linkLabel: 'Read today’s here',
   },
   {
     title: 'NYC Turnover',
@@ -55,6 +59,7 @@ const projects: Project[] = [
     description:
       'I love food. I also got curious about NYC restaurants, cafés, and bars as an asset class – which spots last, which flip constantly, and what the rent has to do with it. So I built an interactive atlas where you can trace each storefront’s lifecycle.',
     href: 'https://half-life-nyc.vercel.app',
+    linkText: 'NYC Turnover',
   },
   {
     title: 'Personal Dashboard',
@@ -100,7 +105,7 @@ const projects: Project[] = [
             <div class="project-desc">{project.description}</div>
             {project.href && !project.linkText && (
               <div class="project-links">
-                <a href={project.href} target="_blank" rel="noopener">Link&nbsp;↗</a>
+                <a href={project.href} target="_blank" rel="noopener">{project.linkLabel ?? 'Link ↗'}</a>
               </div>
             )}
           </div>
