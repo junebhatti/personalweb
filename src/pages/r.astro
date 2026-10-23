@@ -65,7 +65,10 @@ const ENDPOINT = import.meta.env.PUBLIC_REACT_ENDPOINT ?? '';
           card.classList.remove('is-done');
           say('That link isn’t valid.', 'is-error');
         })
-        .catch(() => {
+        .catch((err) => {
+          // Usually the Apps Script answering with an HTML error page instead of
+          // JSON (e.g. doPost missing from the deployed version).
+          console.error('Reaction not saved:', err);
           card.classList.remove('is-done');
           say('Couldn’t save that. Try the link again in a minute.', 'is-error');
         });
