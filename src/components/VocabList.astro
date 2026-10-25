@@ -23,6 +23,7 @@ const { editable = false } = Astro.props;
       <span class="section-label vocab-label">Vocab <span class="vocab-count" data-count></span></span>
       {editable && <button type="button" class="vocab-quiet" data-new hidden>+ Add word</button>}
     </div>
+    <p class="vocab-blurb">Ongoing list since high school of words I come across.</p>
     <div class="vocab-status" data-status role="status" aria-live="polite">Loading…</div>
     <div class="vocab-list" data-list></div>
   </div>
@@ -303,7 +304,12 @@ const { editable = false } = Astro.props;
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    margin-bottom: 24px;
+  }
+  .vocab-blurb {
+    margin: 8px 0 28px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #666;
   }
   .vocab-label {
     margin-bottom: 0;
