@@ -1,110 +1,74 @@
 ---
 import Base from '../layouts/Base.astro';
+import VocabComposer from '../components/VocabComposer.astro';
 
-// Unlisted: nothing links here. Anyone with the link can read the words; adding
-// needs the passphrase, typed once on the phone and checked by add_vocab() in
-// Supabase (see supabase/vocab.sql). The passphrase is never in this page.
+// WordThru's dictionary list (DictionaryWordListView), on the web. Unlisted:
+// nothing links here. Anyone with the link can read; the + only appears on a
+// device that has been unlocked with the passphrase (see VocabComposer).
 const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL ?? '';
 const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
 const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 ---
 
 <Base
-  title="Vocab"
+  title="English Vocabulary"
   noindex
   appTitle="Vocab"
   standalone
   statusBar="default"
+  themeColor="#f2ede0"
   manifest="/vocab.webmanifest"
 >
-  <div class="vocab">
-    <div class="vocab-head">
-      <h1 class="vocab-title">Vocab</h1>
-      <span class="vocab-count" data-count></span>
+  <div class="wt-list-page">
+    <div class="wt-top">
+      <span class="wt-top-side"></span>
+      <h1 class="wt-top-title">English Vocabulary</h1>
+      <button type="button" class="wt-top-side wt-plus" data-plus aria-label="Add a card" hidden>+</button>
     </div>
 
-    <form class="vocab-add" data-add hidden>
-      <input class="vocab-field" name="term" placeholder="word" autocapitalize="off" autocomplete="off" required maxlength="80" />
-      <textarea class="vocab-field" name="meaning" placeholder="meaning (optional)" rows="2" maxlength="500"></textarea>
-      <button type="submit" class="vocab-btn">Add</button>
-    </form>
-
-    <input class="vocab-field vocab-search" data-search type="search" placeholder="search" autocapitalize="off" autocomplete="off" />
-    <div class="vocab-status" data-status role="status" aria-live="polite">
-      {configured ? 'Loading…' : 'Not configured. Set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY.'}
+    <div class="wt-empty" data-status>
+      {configured ? '' : 'Not configured. Set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY.'}
     </div>
-
-    <dl class="vocab-list" data-list></dl>
-
-    <div class="vocab-foot">
-      <button type="button" class="vocab-quiet" data-unlock>add</button>
-      <form class="vocab-unlock" data-unlock-form hidden>
-        <input class="vocab-field" name="passphrase" type="password" placeholder="passphrase" autocomplete="current-password" required />
-        <button type="submit" class="vocab-btn">Unlock</button>
-      </form>
-    </div>
+    <div class="wt-words" data-list></div>
   </div>
+
+  <VocabComposer />
 
   <script is:inline define:vars={{ SUPABASE_URL, SUPABASE_ANON_KEY, configured }}>
     if (configured) {
-      const PASS = 'vocab-passphrase';
-      const $ = (s) => document.querySelector(s);
-      const list = $('[data-list]');
-      const status = $('[data-status]');
-      const count = $('[data-count]');
-      const search = $('[data-search]');
-      const addForm = $('[data-add]');
-      const unlockBtn = $('[data-unlock]');
-      const unlockForm = $('[data-unlock-form]');
-      const headers = {
-        apikey: SUPABASE_ANON_KEY,
-        authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        'content-type': 'application/json',
-      };
+      const list = document.querySelector('[data-list]');
+      const status = document.querySelector('[data-status]');
+      const plus = document.querySelector('[data-plus]');
+      const composer = document.querySelector('[data-wt-composer]');
       let words = [];
 
-      function readPass() {
-        try { return localStorage.getItem(PASS) || ''; } catch (e) { console.error('localStorage read failed', e); return ''; }
-      }
-      function writePass(value) {
-        try {
-          if (value) localStorage.setItem(PASS, value);
-          else localStorage.removeItem(PASS);
-        } catch (e) {
-          console.error('localStorage write failed', e);
+      function row(word) {
+        const item = document.createElement('div');
+        item.className = 'wt-word';
+        const term = document.createElement('div');
+        term.className = 'wt-term';
+        term.textContent = word.term;
+        item.append(term);
+        // WordThru shows nothing under the term when there is no meaning.
+        if (word.meaning.trim()) {
+          const meaning = document.createElement('div');
+          meaning.className = 'wt-meaning';
+          meaning.textContent = word.meaning.trim();
+          item.append(meaning);
         }
-      }
-
-      function rpc(name, args) {
-        return fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(args),
-        });
+        return item;
       }
 
       function render() {
-        const q = search.value.trim().toLowerCase();
-        const shown = q
-          ? words.filter((w) => w.term.toLowerCase().includes(q) || w.meaning.toLowerCase().includes(q))
-          : words;
-        list.replaceChildren(
-          ...shown.flatMap((w) => {
-            const dt = document.createElement('dt');
-            dt.textContent = w.term;
-            const dd = document.createElement('dd');
-            dd.textContent = w.meaning || 'no meaning yet';
-            if (!w.meaning) dd.classList.add('vocab-empty');
-            return [dt, dd];
-          }),
-        );
-        count.textContent = `${words.length} words`;
-        status.textContent = q && shown.length === 0 ? 'No matches.' : '';
+        list.replaceChildren(...words.map(row));
+        status.textContent = words.length ? '' : 'No words yet.';
       }
 
       async function load() {
         try {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/vocab?select=term,meaning&order=term.asc`, { headers });
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/vocab?select=term,meaning&order=term.asc`, {
+            headers: { apikey: SUPABASE_ANON_KEY, authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+          });
           if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
           const rows = await res.json();
           if (!Array.isArray(rows)) throw new Error('Response is not a list');
@@ -116,188 +80,120 @@ const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
         }
       }
 
-      function showEditor(unlocked) {
-        addForm.hidden = !unlocked;
-        unlockBtn.hidden = unlocked;
-        unlockForm.hidden = true;
+      let unlocked = false;
+      try {
+        unlocked = Boolean(localStorage.getItem('vocab-passphrase'));
+      } catch (e) {
+        console.error('localStorage read failed', e);
       }
-
-      unlockBtn.addEventListener('click', () => {
-        unlockBtn.hidden = true;
-        unlockForm.hidden = false;
-        unlockForm.passphrase.focus();
+      plus.hidden = !unlocked;
+      plus.addEventListener('click', () => (composer.hidden = false));
+      document.addEventListener('wt-cancel', () => (composer.hidden = true));
+      document.addEventListener('wt-added', (event) => {
+        words.push(event.detail);
+        words.sort((a, b) => a.term.localeCompare(b.term, undefined, { sensitivity: 'base' }));
+        render();
       });
 
-      unlockForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const passphrase = unlockForm.passphrase.value.trim();
-        status.textContent = 'Checking…';
-        try {
-          const res = await rpc('vocab_passphrase_ok', { passphrase });
-          if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-          if ((await res.json()) !== true) {
-            status.textContent = 'Wrong passphrase.';
-            return;
-          }
-          writePass(passphrase);
-          unlockForm.reset();
-          showEditor(true);
-          status.textContent = 'Unlocked on this device.';
-          addForm.term.focus();
-        } catch (e) {
-          console.error('Passphrase check failed', e);
-          status.textContent = 'Couldn’t check that. Try again in a minute.';
-        }
-      });
-
-      addForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const term = addForm.term.value.trim();
-        const meaning = addForm.meaning.value.trim();
-        if (!term) return;
-        const button = addForm.querySelector('button');
-        button.disabled = true;
-        status.textContent = 'Adding…';
-        try {
-          const res = await rpc('add_vocab', { term, meaning, passphrase: readPass() });
-          if (!res.ok) {
-            const body = await res.text();
-            if (body.includes('bad passphrase')) {
-              writePass('');
-              showEditor(false);
-              status.textContent = 'Passphrase no longer works. Unlock again.';
-              return;
-            }
-            throw new Error(`HTTP ${res.status}: ${body}`);
-          }
-          const result = await res.json();
-          if (result === 'duplicate') {
-            status.textContent = `“${term}” is already on the list.`;
-            return;
-          }
-          words.push({ term, meaning });
-          words.sort((a, b) => a.term.localeCompare(b.term));
-          addForm.reset();
-          search.value = '';
-          render();
-          status.textContent = `Added “${term}”.`;
-          addForm.term.focus();
-        } catch (e) {
-          console.error('Adding word failed', e);
-          status.textContent = 'Couldn’t add that. Your text is still here, try again.';
-        } finally {
-          button.disabled = false;
-        }
-      });
-
-      search.addEventListener('input', render);
-      showEditor(Boolean(readPass()));
       load();
     }
   </script>
 </Base>
 
 <style>
-  .vocab {
+  /* WordThru palette and DictionaryWordListView metrics (ContentView.swift). */
+  .wt-list-page {
+    --shell: #f2ede0;
+    --ink: #171412;
+
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--shell);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, system-ui, 'Helvetica Neue', Arial, sans-serif;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+  :global(body):has(.wt-list-page) {
+    background: #f2ede0;
+  }
+  .wt-top,
+  .wt-words,
+  .wt-empty {
     max-width: 640px;
-    padding: 28px 20px calc(48px + env(safe-area-inset-bottom));
+    margin: 0 auto;
   }
-  .vocab-head {
+  .wt-top {
     display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-bottom: 20px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 18px 12px;
   }
-  .vocab-title {
+  .wt-top-side {
+    width: 32px;
+    height: 32px;
+  }
+  /* Hidden on locked devices, but still holding its slot so the title stays centred. */
+  .wt-plus[hidden] {
+    display: block !important;
+    visibility: hidden;
+  }
+  .wt-top-title {
     margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+  }
+  .wt-plus {
+    font: inherit;
     font-size: 24px;
     font-weight: 400;
-    letter-spacing: -0.02em;
-  }
-  .vocab-count {
-    font-size: 14px;
-    color: #999;
-    font-variant-numeric: tabular-nums;
-  }
-  .vocab-add,
-  .vocab-unlock {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-  .vocab-unlock {
-    margin: 12px 0 0;
-  }
-  .vocab-field {
-    width: 100%;
-    font: inherit;
-    /* 16px keeps iOS from zooming in on focus. */
-    font-size: 16px;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: #fff;
-    color: #111;
-    resize: vertical;
-  }
-  .vocab-field:focus {
-    outline: none;
-    border-color: #45539b;
-  }
-  .vocab-btn {
-    align-self: flex-start;
-    font: inherit;
-    font-size: 15px;
-    padding: 9px 18px;
-    border: 0;
-    border-radius: 6px;
-    background: #45539b;
-    color: #fff;
-    cursor: pointer;
-  }
-  .vocab-btn:disabled {
-    opacity: 0.5;
-  }
-  .vocab-status {
-    min-height: 1.5em;
-    margin: 8px 0 4px;
-    font-size: 14px;
-    color: #888;
-  }
-  .vocab-list {
-    margin: 0;
-  }
-  .vocab-list :global(dt) {
-    padding-top: 14px;
-    border-top: 1px solid #eee;
-    font-size: 17px;
-    letter-spacing: -0.01em;
-    color: #111;
-  }
-  .vocab-list :global(dt:first-child) {
-    border-top: 0;
-  }
-  .vocab-list :global(dd) {
-    margin: 4px 0 14px;
-    font-size: 15px;
-    line-height: 1.5;
-    color: #666;
-  }
-  .vocab-list :global(dd.vocab-empty) {
-    color: #bbb;
-    font-style: italic;
-  }
-  .vocab-foot {
-    margin-top: 32px;
-  }
-  .vocab-quiet {
-    font: inherit;
-    font-size: 14px;
-    padding: 6px 0;
+    line-height: 1;
+    padding: 0;
     border: 0;
     background: none;
-    color: #bbb;
+    color: rgba(23, 20, 18, 0.8);
+    text-align: right;
     cursor: pointer;
+  }
+  .wt-empty {
+    padding: 0 18px;
+    font-family: ui-serif, 'New York', Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: rgba(23, 20, 18, 0.56);
+  }
+  .wt-empty:not(:empty) {
+    padding-top: 30vh;
+    text-align: center;
+  }
+  .wt-words :global(.wt-word) {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 18px;
+    position: relative;
+  }
+  /* The 1px divider is inset 18 on both sides, like WordThru's. */
+  .wt-words :global(.wt-word)::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 0;
+    height: 1px;
+    background: rgba(23, 20, 18, 0.08);
+  }
+  .wt-words :global(.wt-term) {
+    font-family: ui-serif, 'New York', Georgia, 'Times New Roman', serif;
+    font-size: 22px;
+    font-weight: 500;
+  }
+  .wt-words :global(.wt-meaning) {
+    font-size: 12px;
+    line-height: 1.35;
+    color: rgba(23, 20, 18, 0.55);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 </style>

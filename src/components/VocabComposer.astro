@@ -1,0 +1,307 @@
+---
+// WordThru's "Add Card" screen (NoteComposerView), without the AI fill.
+// Adds to the /vocab list through add_vocab() in Supabase (supabase/vocab.sql),
+// which checks the passphrase typed once on this device. The host page shows
+// and hides the root and listens for two events it dispatches:
+//   wt-cancel  — Cancel was tapped
+//   wt-added   — a word was saved; detail is { term, meaning }
+---
+
+<div class="wt-composer" data-wt-composer hidden>
+  <div class="wt-header">
+    <button type="button" class="wt-link" data-wt-cancel>Cancel</button>
+    <button type="button" class="wt-link wt-link-strong" data-wt-save-top disabled>Save Card</button>
+  </div>
+
+  <div class="wt-body">
+    <div class="wt-project">English Vocabulary</div>
+    <div class="wt-title">Add Card</div>
+    <div class="wt-status" data-wt-status role="status" aria-live="polite">Type a term and its definition.</div>
+
+    <form class="wt-form" data-wt-add hidden>
+      <label class="wt-field">
+        <span class="wt-label">Term</span>
+        <input class="wt-input" name="term" placeholder="prodigious" autocapitalize="off" autocomplete="off" maxlength="80" />
+      </label>
+      <label class="wt-field">
+        <span class="wt-label">Definition</span>
+        <textarea class="wt-input" name="meaning" placeholder="what it means" rows="2" maxlength="500"></textarea>
+      </label>
+      <button type="submit" class="wt-save" disabled>Save Card</button>
+    </form>
+
+    <form class="wt-form" data-wt-unlock hidden>
+      <label class="wt-field">
+        <span class="wt-label">Passphrase</span>
+        <input class="wt-input" name="passphrase" type="password" placeholder="vocab passphrase" autocomplete="current-password" required />
+      </label>
+      <button type="submit" class="wt-save">Unlock</button>
+    </form>
+
+    <a class="wt-list-link" href="/vocab" target="_blank" rel="noopener" data-wt-list-link>See all words ↗</a>
+  </div>
+</div>
+
+<script>
+  const URL_ = import.meta.env.PUBLIC_SUPABASE_URL ?? '';
+  const KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+  const PASS = 'vocab-passphrase';
+
+  function readPass(): string {
+    try {
+      return localStorage.getItem(PASS) || '';
+    } catch (e) {
+      console.error('localStorage read failed', e);
+      return '';
+    }
+  }
+  function writePass(value: string) {
+    try {
+      if (value) localStorage.setItem(PASS, value);
+      else localStorage.removeItem(PASS);
+    } catch (e) {
+      console.error('localStorage write failed', e);
+    }
+  }
+  function rpc(name: string, args: object) {
+    return fetch(`${URL_}/rest/v1/rpc/${name}`, {
+      method: 'POST',
+      headers: { apikey: KEY, authorization: `Bearer ${KEY}`, 'content-type': 'application/json' },
+      body: JSON.stringify(args),
+    });
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-wt-composer]')) {
+    const status = root.querySelector<HTMLElement>('[data-wt-status]')!;
+    const addForm = root.querySelector<HTMLFormElement>('[data-wt-add]')!;
+    const unlockForm = root.querySelector<HTMLFormElement>('[data-wt-unlock]')!;
+    const term = addForm.elements.namedItem('term') as HTMLInputElement;
+    const meaning = addForm.elements.namedItem('meaning') as HTMLTextAreaElement;
+    const passphrase = unlockForm.elements.namedItem('passphrase') as HTMLInputElement;
+    const saveButtons = [
+      root.querySelector<HTMLButtonElement>('[data-wt-save-top]')!,
+      addForm.querySelector<HTMLButtonElement>('.wt-save')!,
+    ];
+    let saving = false;
+
+    if (!URL_ || !KEY) {
+      status.textContent = 'Not configured. Set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY.';
+      continue;
+    }
+    // Opened from /vocab itself, a link back to the list would be redundant.
+    if (location.pathname.startsWith('/vocab')) root.querySelector('[data-wt-list-link]')!.remove();
+
+    // WordThru's canSave: both fields filled.
+    const canSave = () => Boolean(term.value.trim() && meaning.value.trim()) && !saving;
+    const refresh = () => saveButtons.forEach((b) => (b.disabled = !canSave()));
+    term.addEventListener('input', refresh);
+    meaning.addEventListener('input', refresh);
+
+    function showUnlocked(unlocked: boolean) {
+      addForm.hidden = !unlocked;
+      unlockForm.hidden = unlocked;
+      if (!unlocked) status.textContent = 'Enter your passphrase once to add words from this device.';
+    }
+    showUnlocked(Boolean(readPass()));
+
+    root.querySelector('[data-wt-cancel]')!.addEventListener('click', () => {
+      root.dispatchEvent(new CustomEvent('wt-cancel', { bubbles: true }));
+    });
+
+    unlockForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      status.textContent = 'Checking…';
+      try {
+        const res = await rpc('vocab_passphrase_ok', { passphrase: passphrase.value.trim() });
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+        if ((await res.json()) !== true) {
+          status.textContent = 'Wrong passphrase.';
+          return;
+        }
+        writePass(passphrase.value.trim());
+        unlockForm.reset();
+        showUnlocked(true);
+        status.textContent = 'Unlocked on this device.';
+        term.focus();
+      } catch (e) {
+        console.error('Passphrase check failed', e);
+        status.textContent = 'Couldn’t check that. Try again in a minute.';
+      }
+    });
+
+    async function save() {
+      if (!canSave()) return;
+      const t = term.value.trim();
+      const m = meaning.value.trim();
+      saving = true;
+      refresh();
+      status.textContent = 'Saving…';
+      try {
+        const res = await rpc('add_vocab', { term: t, meaning: m, passphrase: readPass() });
+        if (!res.ok) {
+          const body = await res.text();
+          if (body.includes('bad passphrase')) {
+            writePass('');
+            showUnlocked(false);
+            status.textContent = 'Passphrase no longer works. Unlock again.';
+            return;
+          }
+          throw new Error(`HTTP ${res.status}: ${body}`);
+        }
+        if ((await res.json()) === 'duplicate') {
+          status.textContent = `“${t}” is already in your list.`;
+          return;
+        }
+        addForm.reset();
+        status.textContent = `Saved “${t}”.`;
+        root.dispatchEvent(new CustomEvent('wt-added', { bubbles: true, detail: { term: t, meaning: m } }));
+        term.focus();
+      } catch (e) {
+        console.error('Saving word failed', e);
+        status.textContent = 'Couldn’t save that. Your text is still here, try again.';
+      } finally {
+        saving = false;
+        refresh();
+      }
+    }
+    addForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      save();
+    });
+    saveButtons[0].addEventListener('click', save);
+  }
+</script>
+
+<style>
+  /* WordThru palette (ContentView.swift, Color extension). */
+  .wt-composer {
+    --shell: #f2ede0;
+    --haze: #f7f5ed;
+    --paper: #fcfaf5;
+    --ink: #171412;
+    --clay: #0f29fa;
+    --line: rgba(36, 28, 20, 0.12);
+
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: linear-gradient(to bottom right, var(--shell), var(--haze), rgba(237, 232, 219, 0.28)), var(--shell);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, system-ui, 'Helvetica Neue', Arial, sans-serif;
+    padding: 6px 0 calc(24px + env(safe-area-inset-bottom));
+  }
+  /* Home-screen apps draw under the status bar; keep clear of it. */
+  @media (display-mode: standalone) {
+    .wt-composer {
+      padding-top: max(54px, calc(env(safe-area-inset-top) + 6px));
+    }
+  }
+  .wt-header,
+  .wt-body {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 18px;
+  }
+  .wt-header {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 6px;
+    padding-bottom: 12px;
+  }
+  .wt-link {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 6px 0;
+    border: 0;
+    background: none;
+    color: rgba(23, 20, 18, 0.76);
+    cursor: pointer;
+  }
+  .wt-link-strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .wt-link-strong:disabled {
+    color: rgba(23, 20, 18, 0.28);
+    cursor: default;
+  }
+  .wt-body,
+  .wt-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .wt-form[hidden] {
+    display: none;
+  }
+  .wt-project {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--clay);
+  }
+  .wt-title {
+    font-family: ui-serif, 'New York', Georgia, 'Times New Roman', serif;
+    font-size: 28px;
+    font-weight: 300;
+    font-style: italic;
+  }
+  .wt-status {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(23, 20, 18, 0.55);
+  }
+  .wt-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .wt-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(23, 20, 18, 0.58);
+  }
+  .wt-input {
+    width: 100%;
+    font: inherit;
+    /* WordThru uses 14pt; under 16px iOS Safari zooms the page on focus. */
+    font-size: 16px;
+    color: var(--ink);
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: rgba(252, 250, 245, 0.96);
+    outline: none;
+    resize: none;
+  }
+  .wt-input::placeholder {
+    color: rgba(23, 20, 18, 0.3);
+  }
+  .wt-input:focus {
+    border-color: rgba(23, 20, 18, 0.3);
+  }
+  .wt-save {
+    margin-top: 8px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 14px;
+    border: 0;
+    border-radius: 18px;
+    background: var(--ink);
+    color: var(--paper);
+    cursor: pointer;
+  }
+  .wt-save:disabled {
+    background: rgba(23, 20, 18, 0.25);
+    cursor: default;
+  }
+  .wt-list-link {
+    margin-top: 6px;
+    font-size: 13px;
+    color: rgba(23, 20, 18, 0.55);
+    text-decoration: none;
+  }
+</style>
