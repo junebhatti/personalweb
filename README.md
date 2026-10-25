@@ -198,6 +198,19 @@ confirmation and posts the tap to the Apps Script web app, so it needs
 it runs JavaScript; recording from the browser keeps mail scanners, which open
 every link, from logging fake taps.
 
+## Vocab
+
+`/vocab` (linked from Other) is the public word list: anyone can read it and open
+a word, nobody can change it. Words live in the Supabase `vocab` table and load
+in the browser, so additions show up without a redeploy.
+
+Changes go through `/vocab/edit` (unlisted, noindex) and the Vocab tab in the
+Draft app. Both ask for the passphrase once per device and keep it in that
+device's localStorage; it is never in the page. Supabase checks it against a
+bcrypt hash in `vocab_secret` inside `add_vocab`, `update_vocab` and
+`delete_vocab` (`supabase/vocab.sql`, then `supabase/vocab-edit.sql`). The
+passphrase is `VOCAB_PASSPHRASE` in `.env`.
+
 ## Course rankings
 
 Courses live in `src/data/coursework.ts` — one object each, holding the name,

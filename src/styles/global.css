@@ -971,6 +971,57 @@ a:hover {
   border-bottom-color: #fff;
 }
 
+/* Out to the site; sits at the far end of the tab row. */
+.draft-home {
+  margin-left: auto;
+  align-self: center;
+  font-size: 15px;
+  color: #b9c1e3;
+  text-decoration: none;
+}
+
+.draft-home:hover {
+  color: #fff;
+}
+
+.draft-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.draft-field {
+  width: 100%;
+  background: #fff;
+  border: 2px solid #000;
+  outline: none;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #111;
+  padding: 14px 16px;
+  resize: none;
+}
+
+.draft-field::placeholder {
+  color: #c8c8c8;
+}
+
+.draft-field-tall {
+  height: 26dvh;
+  min-height: 130px;
+}
+
+.draft-link {
+  font-size: 15px;
+  color: #d3d9ef;
+  text-decoration: none;
+}
+
+.draft-link:hover {
+  color: #fff;
+}
+
 /* Sits on the blue, so it reads light rather than grey. */
 .draft-status {
   font-size: 14px;

@@ -14,8 +14,6 @@ interface Props {
   themeColor?: string;
   /** Android reads this; iOS uses the apple-touch-icon and the meta tags. */
   manifest?: string;
-  /** Standalone status bar: white text over the page, or 'default' (dark, above it) for white pages. */
-  statusBar?: 'black-translucent' | 'default';
 }
 
 const {
@@ -25,7 +23,6 @@ const {
   standalone = false,
   themeColor = '#ffffff',
   manifest = '/site.webmanifest',
-  statusBar = 'black-translucent',
 } = Astro.props;
 ---
 
@@ -50,7 +47,7 @@ const {
             name is the standard that replaced it. */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content={statusBar} />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </>
     )}
     <meta name="apple-mobile-web-app-title" content={appTitle} />

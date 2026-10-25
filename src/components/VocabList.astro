@@ -1,0 +1,426 @@
+---
+// The vocab list, read live from Supabase. Tapping a word opens it.
+//
+// Public (/vocab): read-only. Editable (/vocab/edit): asks for the passphrase
+// once per device, then adds, edits and deletes through the passphrase-checked
+// functions in supabase/vocab.sql and supabase/vocab-edit.sql.
+interface Props {
+  editable?: boolean;
+}
+const { editable = false } = Astro.props;
+---
+
+<div class="vocab" data-vocab data-editable={editable ? 'true' : 'false'}>
+  {editable && (
+    <form class="vocab-form" data-unlock hidden>
+      <input class="vocab-input" name="passphrase" type="password" placeholder="passphrase" autocomplete="current-password" required />
+      <button type="submit" class="vocab-btn">Unlock</button>
+    </form>
+  )}
+
+  <div data-list-view>
+    <div class="vocab-head">
+      <span class="section-label vocab-label">Vocab <span class="vocab-count" data-count></span></span>
+      {editable && <button type="button" class="vocab-quiet" data-new hidden>+ Add word</button>}
+    </div>
+    <div class="vocab-status" data-status role="status" aria-live="polite">Loading…</div>
+    <div class="vocab-list" data-list></div>
+  </div>
+
+  <div class="vocab-word" data-word-view hidden>
+    <button type="button" class="vocab-quiet vocab-backlink" data-close>&larr; all words</button>
+    {editable ? (
+      <form class="vocab-form" data-edit>
+        <input class="vocab-input vocab-input-term" name="term" placeholder="word" autocapitalize="off" autocomplete="off" required maxlength="80" />
+        <textarea class="vocab-input" name="meaning" placeholder="meaning" rows="4" maxlength="500"></textarea>
+        <div class="vocab-actions">
+          <button type="submit" class="vocab-btn">Save</button>
+          <button type="button" class="vocab-quiet vocab-danger" data-delete>Delete</button>
+        </div>
+        <div class="vocab-status" data-edit-status role="status" aria-live="polite"></div>
+      </form>
+    ) : (
+      <>
+        <h1 class="vocab-word-term" data-term></h1>
+        <p class="vocab-word-meaning" data-meaning></p>
+      </>
+    )}
+  </div>
+</div>
+
+<script>
+  type Word = { id: number; term: string; meaning: string };
+
+  const URL_ = import.meta.env.PUBLIC_SUPABASE_URL ?? '';
+  const KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+  const PASS = 'vocab-passphrase';
+  const headers = { apikey: KEY, authorization: `Bearer ${KEY}`, 'content-type': 'application/json' };
+
+  function readPass(): string {
+    try {
+      return localStorage.getItem(PASS) || '';
+    } catch (e) {
+      console.error('localStorage read failed', e);
+      return '';
+    }
+  }
+  function writePass(value: string) {
+    try {
+      if (value) localStorage.setItem(PASS, value);
+      else localStorage.removeItem(PASS);
+    } catch (e) {
+      console.error('localStorage write failed', e);
+    }
+  }
+  async function rpc(name: string, args: object): Promise<unknown> {
+    const res = await fetch(`${URL_}/rest/v1/rpc/${name}`, { method: 'POST', headers, body: JSON.stringify(args) });
+    const body = await res.text();
+    if (!res.ok) throw new Error(body.includes('bad passphrase') ? 'bad passphrase' : `HTTP ${res.status}: ${body}`);
+    return JSON.parse(body);
+  }
+  const byTerm = (a: Word, b: Word) => a.term.localeCompare(b.term, undefined, { sensitivity: 'base' });
+
+  const root = document.querySelector<HTMLElement>('[data-vocab]');
+  if (root) {
+    const editable = root.dataset.editable === 'true';
+    const $ = <T extends Element>(s: string) => root.querySelector<T>(s);
+    const listView = $<HTMLElement>('[data-list-view]')!;
+    const wordView = $<HTMLElement>('[data-word-view]')!;
+    const list = $<HTMLElement>('[data-list]')!;
+    const status = $<HTMLElement>('[data-status]')!;
+    const count = $<HTMLElement>('[data-count]')!;
+    let words: Word[] = [];
+
+    function render() {
+      list.replaceChildren(
+        ...words.map((w) => {
+          const item = document.createElement('a');
+          item.className = 'vocab-item';
+          item.href = `#${w.id}`;
+          const term = document.createElement('span');
+          term.className = 'vocab-term';
+          term.textContent = w.term;
+          item.append(term);
+          if (w.meaning) {
+            const meaning = document.createElement('span');
+            meaning.className = 'vocab-meaning';
+            meaning.textContent = w.meaning;
+            item.append(meaning);
+          }
+          return item;
+        }),
+      );
+      count.textContent = `· ${words.length}`;
+      status.textContent = words.length ? '' : 'No words yet.';
+    }
+
+    async function load() {
+      if (!URL_ || !KEY) {
+        status.textContent = 'Not configured. Set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY.';
+        return;
+      }
+      try {
+        const res = await fetch(`${URL_}/rest/v1/vocab?select=id,term,meaning&order=term.asc`, { headers });
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+        const rows: unknown = await res.json();
+        if (!Array.isArray(rows)) throw new Error('Response is not a list');
+        words = rows.filter(
+          (r): r is Word => typeof r?.id === 'number' && typeof r.term === 'string' && typeof r.meaning === 'string',
+        );
+        words.sort(byTerm);
+        render();
+        route();
+      } catch (e) {
+        console.error('Loading vocab failed', e);
+        status.textContent = 'Couldn’t load words. Try again in a minute.';
+      }
+    }
+
+    // The open word lives in the URL hash (#123, or #new in the editor), so
+    // the browser's back button closes it.
+    function route() {
+      const hash = location.hash.slice(1);
+      const word = words.find((w) => String(w.id) === hash);
+      const isNew = editable && hash === 'new';
+      document.body.classList.toggle('vocab-word-open', Boolean(word || isNew));
+      if (!word && !isNew) {
+        wordView.hidden = true;
+        listView.hidden = false;
+        return;
+      }
+      if (editable) openEditor(word ?? null);
+      else {
+        $<HTMLElement>('[data-term]')!.textContent = word!.term;
+        const meaning = $<HTMLElement>('[data-meaning]')!;
+        meaning.textContent = word!.meaning || 'No meaning yet.';
+        meaning.classList.toggle('vocab-empty', !word!.meaning);
+      }
+      listView.hidden = true;
+      wordView.hidden = false;
+      window.scrollTo(0, 0);
+    }
+    window.addEventListener('hashchange', route);
+
+    // Back to the list. When the word was opened from the list, go back in
+    // history so the list keeps its scroll position; when someone landed on a
+    // word's link directly, history.back() would leave the site, so just clear it.
+    let openedFromList = false;
+    list.addEventListener('click', (event) => {
+      if ((event.target as Element).closest('.vocab-item')) openedFromList = true;
+    });
+    function close() {
+      if (openedFromList) {
+        openedFromList = false;
+        history.back();
+      } else {
+        history.replaceState(null, '', location.pathname);
+        route();
+      }
+    }
+    $('[data-close]')!.addEventListener('click', close);
+
+    // --- Editing (only on /vocab/edit) ---
+    let current: Word | null = null;
+    function openEditor(word: Word | null) {
+      current = word;
+      const form = $<HTMLFormElement>('[data-edit]')!;
+      (form.elements.namedItem('term') as HTMLInputElement).value = word?.term ?? '';
+      (form.elements.namedItem('meaning') as HTMLTextAreaElement).value = word?.meaning ?? '';
+      $<HTMLElement>('[data-delete]')!.hidden = !word;
+      $<HTMLElement>('[data-edit-status]')!.textContent = '';
+      if (!word) (form.elements.namedItem('term') as HTMLInputElement).focus();
+    }
+
+    function lockedOut(editStatus: HTMLElement) {
+      writePass('');
+      editStatus.textContent = 'Passphrase no longer works. Unlock again.';
+      setTimeout(() => location.reload(), 1200);
+    }
+
+    if (editable) {
+      const unlock = $<HTMLFormElement>('[data-unlock]')!;
+      const newBtn = $<HTMLElement>('[data-new]')!;
+      const form = $<HTMLFormElement>('[data-edit]')!;
+      const editStatus = $<HTMLElement>('[data-edit-status]')!;
+
+      function showUnlocked(on: boolean) {
+        unlock.hidden = on;
+        root!.classList.toggle('is-locked', !on);
+        newBtn.hidden = !on;
+      }
+      showUnlocked(Boolean(readPass()));
+
+      unlock.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const input = unlock.elements.namedItem('passphrase') as HTMLInputElement;
+        try {
+          if ((await rpc('vocab_passphrase_ok', { passphrase: input.value.trim() })) !== true) {
+            status.textContent = 'Wrong passphrase.';
+            return;
+          }
+          writePass(input.value.trim());
+          unlock.reset();
+          showUnlocked(true);
+          status.textContent = '';
+        } catch (e) {
+          console.error('Passphrase check failed', e);
+          status.textContent = 'Couldn’t check that. Try again in a minute.';
+        }
+      });
+
+      newBtn.addEventListener('click', () => {
+        openedFromList = true;
+        location.hash = 'new';
+      });
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const term = (form.elements.namedItem('term') as HTMLInputElement).value.trim();
+        const meaning = (form.elements.namedItem('meaning') as HTMLTextAreaElement).value.trim();
+        if (!term) return;
+        editStatus.textContent = 'Saving…';
+        try {
+          const passphrase = readPass();
+          const result = current
+            ? await rpc('update_vocab', { word_id: current.id, term, meaning, passphrase })
+            : await rpc('add_vocab', { term, meaning, passphrase });
+          if (result === 'duplicate') {
+            editStatus.textContent = `“${term}” is already on the list.`;
+            return;
+          }
+          if (result === 'missing') {
+            editStatus.textContent = 'That word was deleted somewhere else.';
+            return;
+          }
+          if (current) Object.assign(current, { term, meaning });
+          else {
+            // add_vocab doesn't return the new id; reload to pick it up.
+            await load();
+          }
+          words.sort(byTerm);
+          render();
+          close();
+        } catch (e) {
+          if (e instanceof Error && e.message === 'bad passphrase') return lockedOut(editStatus);
+          console.error('Saving word failed', e);
+          editStatus.textContent = 'Couldn’t save. Your text is still here, try again.';
+        }
+      });
+
+      $('[data-delete]')!.addEventListener('click', async () => {
+        if (!current || !confirm(`Delete “${current.term}”?`)) return;
+        editStatus.textContent = 'Deleting…';
+        try {
+          await rpc('delete_vocab', { word_id: current.id, passphrase: readPass() });
+          words = words.filter((w) => w !== current);
+          render();
+          close();
+        } catch (e) {
+          if (e instanceof Error && e.message === 'bad passphrase') return lockedOut(editStatus);
+          console.error('Deleting word failed', e);
+          editStatus.textContent = 'Couldn’t delete. Try again.';
+        }
+      });
+    }
+
+    load();
+  }
+</script>
+
+<style>
+  .vocab {
+    max-width: 640px;
+  }
+  /* With a word open, "← all words" replaces the page's own back link. */
+  :global(body.vocab-word-open .back-row) {
+    display: none;
+  }
+  /* Locked editor: only the passphrase box until it's unlocked. */
+  .vocab.is-locked [data-list-view] {
+    display: none;
+  }
+  .vocab-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .vocab-label {
+    margin-bottom: 0;
+  }
+  .vocab-count {
+    color: #aaa;
+  }
+  .vocab-status {
+    font-size: 14px;
+    color: #888;
+  }
+  .vocab-status:empty {
+    display: none;
+  }
+  .vocab-list :global(.vocab-item) {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 0;
+    border-bottom: 1px solid #eee;
+    text-decoration: none;
+    color: #111;
+  }
+  .vocab-list :global(.vocab-item:first-child) {
+    padding-top: 0;
+  }
+  .vocab-list :global(.vocab-term) {
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    transition: color 120ms;
+  }
+  .vocab-list :global(.vocab-item:hover .vocab-term) {
+    color: #45539b;
+  }
+  .vocab-list :global(.vocab-meaning) {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #666;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .vocab-word-term {
+    margin: 28px 0 12px;
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+  }
+  .vocab-word-meaning {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.55;
+    color: #555;
+  }
+  .vocab-empty {
+    color: #aaa;
+  }
+  .vocab-quiet {
+    font: inherit;
+    font-size: 15px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #45539b;
+    cursor: pointer;
+  }
+  .vocab-quiet:hover {
+    color: #1a1aff;
+  }
+  .vocab-danger {
+    color: #b3261e;
+  }
+  .vocab-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .vocab-word .vocab-form {
+    margin-top: 24px;
+  }
+  [data-unlock] {
+    margin-bottom: 24px;
+  }
+  .vocab-input {
+    width: 100%;
+    font: inherit;
+    /* 16px or more keeps iOS from zooming in on focus. */
+    font-size: 17px;
+    line-height: 1.5;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #111;
+    outline: none;
+    resize: vertical;
+  }
+  .vocab-input:focus {
+    border-color: #45539b;
+  }
+  .vocab-input-term {
+    font-size: 22px;
+    letter-spacing: -0.015em;
+  }
+  .vocab-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .vocab-btn {
+    font: inherit;
+    font-size: 16px;
+    padding: 11px 22px;
+    border: 0;
+    background: #111;
+    color: #fff;
+    cursor: pointer;
+  }
+</style>

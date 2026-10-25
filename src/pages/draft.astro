@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import VocabComposer from '../components/VocabComposer.astro';
 
 // Unlisted on purpose: nothing links here, and it asks search engines to stay
 // away. It is a private writing surface, not a page of the site.
@@ -25,7 +24,10 @@ const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && DRAFT_KEY);
           <div class="draft-tabs" role="tablist">
             <button type="button" class="draft-tab" role="tab" data-tab="draft">Draft</button>
             <button type="button" class="draft-tab" role="tab" data-tab="vocab">Vocab</button>
+            <a class="draft-home" href="/">Home</a>
           </div>
+
+          <div class="draft-pane" data-pane="draft">
 
           <textarea
             class="draft-input"
@@ -45,8 +47,23 @@ const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && DRAFT_KEY);
 
           <span class="draft-status" data-status role="status" aria-live="polite"></span>
 
-          {/* WordThru's Add Card screen, over the draft box while the Vocab tab is on. */}
-          <VocabComposer />
+          </div>
+
+          {/* Adds to the vocab list. The passphrase is typed once and kept on
+              this device; add_vocab() in Supabase checks it (supabase/vocab.sql). */}
+          <div class="draft-pane" data-pane="vocab" hidden>
+            <form class="draft-pane" data-vocab-add hidden>
+              <input class="draft-field" name="term" placeholder="word" autocapitalize="off" autocomplete="off" required maxlength="80" />
+              <textarea class="draft-field draft-field-tall" name="meaning" placeholder="meaning" maxlength="500"></textarea>
+              <button type="submit" class="draft-btn">Add word</button>
+            </form>
+            <form class="draft-pane" data-vocab-unlock hidden>
+              <input class="draft-field" name="passphrase" type="password" placeholder="vocab passphrase" autocomplete="current-password" required />
+              <button type="submit" class="draft-btn">Unlock</button>
+            </form>
+            <span class="draft-status" data-vocab-status role="status" aria-live="polite"></span>
+            <a class="draft-link" href="/vocab/edit">Edit list &rarr;</a>
+          </div>
         </>
       ) : (
         <p class="draft-unconfigured">
@@ -115,23 +132,99 @@ const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && DRAFT_KEY);
         if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') send(false);
       });
 
-      // --- Draft | Vocab switch, remembered on this device. Vocab opens
-      // WordThru's Add Card screen (VocabComposer); its Cancel comes back here.
+      // --- Draft | Vocab switch, remembered on this device ---
       const TAB = 'draft-tab';
       const tabs = Array.from(document.querySelectorAll('[data-tab]'));
-      const composer = document.querySelector('[data-wt-composer]');
-      function showTab(name) {
-        for (const tab of tabs) tab.setAttribute('aria-selected', String(tab.dataset.tab === name));
-        composer.hidden = name !== 'vocab';
+      function store(key, value) {
         try {
-          localStorage.setItem(TAB, name);
+          if (value) localStorage.setItem(key, value);
+          else localStorage.removeItem(key);
         } catch (e) {
           console.error('localStorage write failed', e);
         }
       }
+      function showTab(name) {
+        for (const tab of tabs) tab.setAttribute('aria-selected', String(tab.dataset.tab === name));
+        for (const pane of document.querySelectorAll('[data-pane]')) pane.hidden = pane.dataset.pane !== name;
+        store(TAB, name);
+      }
       for (const tab of tabs) tab.addEventListener('click', () => showTab(tab.dataset.tab));
-      document.addEventListener('wt-cancel', () => showTab('draft'));
       showTab(localStorage.getItem(TAB) === 'vocab' ? 'vocab' : 'draft');
+
+      // --- Add a vocab word ---
+      const PASS = 'vocab-passphrase';
+      const addForm = document.querySelector('[data-vocab-add]');
+      const unlockForm = document.querySelector('[data-vocab-unlock]');
+      const vocabStatus = document.querySelector('[data-vocab-status]');
+      async function rpc(name, args) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
+          method: 'POST',
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify(args),
+        });
+        const body = await res.text();
+        if (!res.ok) throw new Error(body.includes('bad passphrase') ? 'bad passphrase' : `HTTP ${res.status}: ${body}`);
+        return JSON.parse(body);
+      }
+      function showUnlocked(unlocked) {
+        addForm.hidden = !unlocked;
+        unlockForm.hidden = unlocked;
+      }
+      showUnlocked(Boolean(localStorage.getItem(PASS)));
+
+      unlockForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const passphrase = unlockForm.passphrase.value.trim();
+        vocabStatus.textContent = 'Checking…';
+        try {
+          if ((await rpc('vocab_passphrase_ok', { passphrase })) !== true) {
+            vocabStatus.textContent = 'Wrong passphrase.';
+            return;
+          }
+          store(PASS, passphrase);
+          unlockForm.reset();
+          showUnlocked(true);
+          vocabStatus.textContent = 'Unlocked on this device.';
+        } catch (e) {
+          console.error('Passphrase check failed', e);
+          vocabStatus.textContent = 'Couldn’t check that. Try again in a minute.';
+        }
+      });
+
+      addForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const term = addForm.term.value.trim();
+        const meaning = addForm.meaning.value.trim();
+        if (!term) return;
+        const button = addForm.querySelector('button');
+        button.disabled = true;
+        vocabStatus.textContent = 'Adding…';
+        try {
+          const result = await rpc('add_vocab', { term, meaning, passphrase: localStorage.getItem(PASS) || '' });
+          if (result === 'duplicate') {
+            vocabStatus.textContent = `“${term}” is already on the list.`;
+            return;
+          }
+          addForm.reset();
+          vocabStatus.textContent = `Added “${term}”.`;
+          addForm.term.focus();
+        } catch (e) {
+          if (e.message === 'bad passphrase') {
+            store(PASS, '');
+            showUnlocked(false);
+            vocabStatus.textContent = 'Passphrase no longer works. Unlock again.';
+            return;
+          }
+          console.error('Adding word failed', e);
+          vocabStatus.textContent = 'Couldn’t add that. Your text is still here, try again.';
+        } finally {
+          button.disabled = false;
+        }
+      });
     }
   </script>
 </Base>

@@ -1,0 +1,18 @@
+---
+import Base from '../../layouts/Base.astro';
+import VocabList from '../../components/VocabList.astro';
+
+// The public word list: read-only for everyone. Words are added and edited
+// from /vocab/edit (unlisted) or the Vocab tab in the Draft app.
+---
+
+<Base title="Vocab — Junaid Bhatti">
+  <div class="page">
+    <div class="back-row">
+      <a href="/other" class="back-link">&larr; back</a>
+    </div>
+    <div class="content">
+      <VocabList />
+    </div>
+  </div>
+</Base>
