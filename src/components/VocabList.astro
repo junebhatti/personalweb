@@ -24,6 +24,7 @@ const { editable = false } = Astro.props;
       {editable && <button type="button" class="vocab-quiet" data-new hidden>+ Add word</button>}
     </div>
     <p class="vocab-blurb">Ongoing list of words I’ve come across since high school.</p>
+    <input class="vocab-search" data-search type="search" placeholder="Search" aria-label="Search words" autocapitalize="off" autocomplete="off" />
     <div class="vocab-status" data-status role="status" aria-live="polite">Loading…</div>
     <div class="vocab-list" data-list></div>
   </div>
@@ -90,11 +91,16 @@ const { editable = false } = Astro.props;
     const list = $<HTMLElement>('[data-list]')!;
     const status = $<HTMLElement>('[data-status]')!;
     const count = $<HTMLElement>('[data-count]')!;
+    const search = $<HTMLInputElement>('[data-search]')!;
     let words: Word[] = [];
 
     function render() {
+      const q = search.value.trim().toLowerCase();
+      const shown = q
+        ? words.filter((w) => w.term.toLowerCase().includes(q) || w.meaning.toLowerCase().includes(q))
+        : words;
       list.replaceChildren(
-        ...words.map((w) => {
+        ...shown.map((w) => {
           const item = document.createElement('a');
           item.className = 'vocab-item';
           item.href = `#${w.id}`;
@@ -112,8 +118,9 @@ const { editable = false } = Astro.props;
         }),
       );
       count.textContent = `· ${words.length}`;
-      status.textContent = words.length ? '' : 'No words yet.';
+      status.textContent = !words.length ? 'No words yet.' : shown.length ? '' : 'No matches.';
     }
+    search.addEventListener('input', render);
 
     async function load() {
       if (!URL_ || !KEY) {
@@ -306,7 +313,7 @@ const { editable = false } = Astro.props;
     justify-content: space-between;
   }
   .vocab-blurb {
-    margin: 8px 0 28px;
+    margin: 8px 0 18px;
     font-size: 15px;
     line-height: 1.5;
     color: #666;
@@ -317,7 +324,27 @@ const { editable = false } = Astro.props;
   .vocab-count {
     color: #aaa;
   }
+  .vocab-search {
+    width: 100%;
+    max-width: 280px;
+    margin-bottom: 20px;
+    font: inherit;
+    /* 16px keeps iOS from zooming in on focus. */
+    font-size: 16px;
+    padding: 7px 10px;
+    border: 1px solid #ddd;
+    border-radius: 0;
+    background: #fff;
+    color: #111;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .vocab-search:focus {
+    border-color: #45539b;
+  }
   .vocab-status {
+    margin-bottom: 12px;
     font-size: 14px;
     color: #888;
   }
