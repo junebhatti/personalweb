@@ -81,3 +81,8 @@ I think a lot of dissatisfaction comes from a deep and inherited belief that the
 ## Conclusion
 
 Counterintuitively, surrendering is not a loss of agency, but actually a gain. Instead of belonging to a false reality of prediction and guesswork, you begin to live presently where you should've been all along. You rely on the senses to direct you physically, intuition to guide you mentally, and spirituality to steer you as a being. Go back to the start [(1.1)](#s1-1), the ocean, the sun, time, other people, none of it was ever yours. You still work, still choose, still care, you just stop needing them to turn out a certain way to be at peace. Rid your mind of arrogance and entitlement to control, and be humble to the world.
+
+
+---
+
+1. style inspo from Sasha Chapin
