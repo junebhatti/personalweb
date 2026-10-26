@@ -817,6 +817,13 @@ a:hover {
   margin: 32px 0;
 }
 
+/* Footnotes: a post that ends with a rule and then a numbered list. */
+.post-body hr:last-of-type + ol:last-child {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #888;
+}
+
 .post-body blockquote {
   margin: 0 0 18px;
   padding-left: 18px;
