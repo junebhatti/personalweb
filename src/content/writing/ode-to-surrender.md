@@ -1,5 +1,5 @@
 ---
-title: "Ode to Surrender"
+title: "ode to surrender"
 date: 2026-10-25
 ---
 
