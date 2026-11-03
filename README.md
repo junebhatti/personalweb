@@ -176,8 +176,11 @@ launchctl unload ~/Library/LaunchAgents/com.junaid.personal-site-notes.plist
 ```
 
 The script only ever stages `src/content/notes`, so work in progress elsewhere
-in the repo is never swept into an automatic commit. If the push fails it stops
-and says so rather than trying to resolve anything itself.
+in the repo is never swept into an automatic commit. If GitHub has newer commits
+(the Morning Brief pushes every morning), it rebases its note syncs on top and
+pushes again, but only when every unpushed commit touches `src/content/notes`
+alone. Anything else, or a failed rebase, it leaves as it is, logs to
+`~/Library/Logs/personal-site-notes.log`, and shows a macOS notification.
 
 ## Morning Brief
 
