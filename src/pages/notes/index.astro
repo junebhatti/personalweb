@@ -49,10 +49,15 @@ for (const note of notes) {
             <div class="note-group-date">{formatDate(group.date)}</div>
             <div class="note-list">
               {group.notes.map((note) => (
-                <a href={`/notes/${note.id}`} class="note-card">
+                // A div, not an <a>: a note can contain links of its own, and a
+                // link inside a link is invalid HTML that the browser splits
+                // the card apart over. The stretched link makes the whole card
+                // clickable; links in the note sit above it (see global.css).
+                <div class="note-card">
+                  <a href={`/notes/${note.id}`} class="note-card-link" aria-label="Open note"></a>
                   {note.time && <div class="note-time">{note.time}</div>}
                   <div class="note-card-body"><note.Content /></div>
-                </a>
+                </div>
               ))}
             </div>
           </div>

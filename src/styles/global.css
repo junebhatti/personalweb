@@ -271,8 +271,20 @@ a:hover {
   line-height: 1.5;
 }
 
-.note-card:hover {
-  color: #111;
+/* Covers the whole card, so a click anywhere opens the note. */
+.note-card {
+  position: relative;
+}
+
+.note-card-link {
+  position: absolute;
+  inset: 0;
+}
+
+/* Links inside the note stay clickable on top of the card's link. */
+.note-card-body a {
+  position: relative;
+  z-index: 1;
 }
 
 /* The card used to space its paragraphs with its own flex gap, back when each
