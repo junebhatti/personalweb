@@ -3,8 +3,11 @@
 #
 # Meant to be run unattended by the launchd agent in this folder, so it is
 # deliberately conservative: it only ever stages src/content/notes, never the
-# rest of the working tree, and it never rebases or resolves anything. If the
-# push fails it says so and stops, leaving the repo for you to sort out.
+# rest of the working tree. When GitHub has newer commits (the Morning Brief
+# pushes every morning), it rebases its own note syncs on top, but only when
+# every unpushed commit touches nothing outside src/content/notes. Anything
+# else, or a rebase conflict, it leaves alone, logs, and raises a Mac
+# notification so a stuck sync never goes unnoticed.
 
 set -uo pipefail
 
@@ -13,6 +16,36 @@ VAULT="${OBSIDIAN_NOTES_DIR:-/Users/junaid/Obsidian/junaidb/Writing/Brain Dump}"
 export PATH="/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 cd "$REPO" || exit 1
+
+notify() {
+  osascript -e "display notification \"$1\" with title \"Notes sync\"" >/dev/null 2>&1 \
+    || echo "couldn't show notification: $1"
+}
+
+# Push main. If GitHub rejects it because it has newer commits, put our note
+# syncs on top of them and push again, but only when the unpushed commits are
+# notes-only, so this can never rewrite hand-made work.
+push_main() {
+  git push -q origin main && return 0
+  echo "push rejected — fetching to see what's new on GitHub"
+  if ! git fetch -q origin main; then
+    echo "fetch failed"
+    return 1
+  fi
+  if [ -n "$(git diff --name-only origin/main...main -- . ':(exclude)src/content/notes')" ]; then
+    echo "unpushed commits touch more than src/content/notes; not rebasing"
+    return 1
+  fi
+  # --autostash sets aside uncommitted edits elsewhere in the repo (work in
+  # progress) and puts them back afterwards; without it the rebase refuses.
+  if ! git rebase -q --autostash origin/main; then
+    [ -d .git/rebase-merge ] || [ -d .git/rebase-apply ] && git rebase --abort
+    echo "rebase onto origin/main failed; aborted, repo left as it was"
+    return 1
+  fi
+  echo "rebased note syncs onto GitHub's newer commits"
+  git push -q origin main
+}
 
 echo "--- $(date '+%Y-%m-%d %H:%M:%S') ---"
 
@@ -53,6 +86,7 @@ npm run drafts --silent || echo "phone draft pull failed (continuing)"
 
 if ! npm run notes --silent; then
   echo "sync failed"
+  notify "Couldn't read your Obsidian notes. See ~/Library/Logs/personal-site-notes.log"
   exit 1
 fi
 
@@ -64,10 +98,11 @@ if git diff --cached --quiet -- src/content/notes; then
   # failed to push (network down, credentials unavailable, iCloud-evicted
   # git files). Sweep any stranded commit out before calling it a day.
   if [ -n "$(git log origin/main..main --oneline 2>/dev/null)" ]; then
-    if git push -q origin main; then
+    if push_main; then
       echo "pushed a stranded earlier commit — Vercel will redeploy"
     else
       echo "push failed (stranded commit remains; push by hand once resolved)"
+      notify "Notes are stuck on this Mac and didn't reach the site. See ~/Library/Logs/personal-site-notes.log"
       exit 1
     fi
   else
@@ -87,13 +122,15 @@ if ! git commit -q -m "Sync notes from the vault"; then
   warm "$REPO/.git"
   if ! git commit -q -m "Sync notes from the vault"; then
     echo "commit failed twice"
+    notify "Couldn't commit your notes. See ~/Library/Logs/personal-site-notes.log"
     exit 1
   fi
 fi
 
-if git push -q origin main; then
+if push_main; then
   echo "pushed — Vercel will redeploy"
 else
   echo "push failed (committed locally; push by hand once resolved)"
+  notify "Notes are stuck on this Mac and didn't reach the site. See ~/Library/Logs/personal-site-notes.log"
   exit 1
 fi
