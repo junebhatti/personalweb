@@ -5,4 +5,4 @@ time: 12:29 AM
 source: obsidian
 ---
 
-humans are the only species where we specialize to this degree. the sheer quantity of specialization is what makes us so unique. let curiosity be the shameless driver of your purpose
+humans are the only species where we specialize to this degree. the sheer quantity of exploration is what makes us so unique. let curiosity be the shameless driver of your purpose
