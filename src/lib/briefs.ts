@@ -43,7 +43,7 @@ export const briefs: Brief[] = Object.entries(files)
 
 export type LaterItem = {
   date: string;
-  /** "X account", "Tool", "App", "Repo", "Channel" */
+  /** "X account", "Tool", "App", "Repo", "Channel", "Video" */
   kind: string;
   name: string;
   href: string;
@@ -52,7 +52,7 @@ export type LaterItem = {
 
 // Kinds kept on /brief/later: things to follow, try, or install. Early issues also
 // suggested blogs and newsletters, which aren't worth keeping a list of.
-const LATER_KINDS = ['X account', 'Tool', 'App', 'Repo', 'Channel'];
+const LATER_KINDS = ['X account', 'Tool', 'App', 'Repo', 'Channel', 'Video'];
 
 const stripTags = (s: string) => s.replace(/<[^>]+>/g, '').trim();
 
