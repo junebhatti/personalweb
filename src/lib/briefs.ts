@@ -41,6 +41,40 @@ export const briefs: Brief[] = Object.entries(files)
   .filter((b) => b.date && b.body)
   .sort((a, b) => b.date.localeCompare(a.date));
 
+export type LaterItem = {
+  date: string;
+  /** "X account", "Tool", "App", "Repo", "Channel" */
+  kind: string;
+  name: string;
+  href: string;
+  reason: string;
+};
+
+// Kinds kept on /brief/later: things to follow, try, or install. Early issues also
+// suggested blogs and newsletters, which aren't worth keeping a list of.
+const LATER_KINDS = ['X account', 'Tool', 'App', 'Repo', 'Channel'];
+
+const stripTags = (s: string) => s.replace(/<[^>]+>/g, '').trim();
+
+/** Every "Look into later" item across all issues, newest first. */
+export const laterItems: LaterItem[] = Object.entries(files)
+  .flatMap(([file, html]) => {
+    const date = file.match(/(\d{4}-\d{2}-\d{2})\.html$/)?.[1] ?? '';
+    const section = html.slice(html.indexOf('Look into later'));
+    const cells = section.matchAll(
+      /<td valign="top"><div[^>]*>([\s\S]*?)<\/div><div[^>]*><a href="([^"]+)"[^>]*>([\s\S]*?)<\/a><\/div><div[^>]*>([\s\S]*?)<\/div>/g
+    );
+    return [...cells].map(([, kind, href, name, reason]) => ({
+      date,
+      kind: stripTags(kind),
+      href: href.replace(/&amp;/g, '&'),
+      name: stripTags(name),
+      reason: stripTags(reason),
+    }));
+  })
+  .filter((item) => item.date && LATER_KINDS.some((k) => k.toLowerCase() === item.kind.toLowerCase()))
+  .sort((a, b) => b.date.localeCompare(a.date));
+
 /** "2026-10-21" → "October 21, 2026" */
 export function briefDate(date: string): string {
   return new Date(date + 'T12:00:00Z').toLocaleDateString('en-US', {
