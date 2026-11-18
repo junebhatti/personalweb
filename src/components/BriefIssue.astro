@@ -16,7 +16,10 @@ const { brief, older, newer } = Astro.props;
   <Fragment set:html={brief.head} />
   <nav class="brief-nav">
     <a href="/">&larr; back</a>
-    <a href="/brief/archive">archive</a>
+    <span>
+      <a href="/brief/later">later</a>
+      <a href="/brief/archive">archive</a>
+    </span>
   </nav>
   <div class="brief-issue">
     <Fragment set:html={brief.body} />

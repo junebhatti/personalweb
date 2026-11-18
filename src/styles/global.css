@@ -1123,6 +1123,52 @@ a:hover {
   line-height: 1.35;
 }
 
+.brief-nav span a + a {
+  margin-left: 16px;
+}
+
+/* /brief/later: what to follow, try, or install, grouped by kind. */
+.later-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.later-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.later-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 620px;
+}
+
+.later-name {
+  font-size: 19px;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.later-reason {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #555;
+}
+
+.later-date {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: #888;
+  text-decoration: none;
+}
+
 /* --- Reaction page (/r) --- */
 
 /* Matches the brief: same gray, same blue. The mark pops in, a ring spreads
