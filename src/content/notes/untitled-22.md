@@ -10,4 +10,4 @@ Two types of memories
 
 2. The involuntary – evoked from sensory/motor experiences. Forced to be put back into this place. A unique smell transports you back to an exact moment in time; a distinct sight that you remember from many years prior that reminds you of a great story.
 
-Humans are constructed from their pasts, from those singular moments that accumulate over the time. Those moments that you can't do an active recall on but show up when you least expect. Much more powerful emotions in my opinion. I feel s
+Humans are constructed from their pasts, from those singular moments that accumulate over the time. Those moments that you can't do an active recall on but show up when you least expect. Much more powerful emotions in my opinion.
