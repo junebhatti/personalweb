@@ -1,7 +1,7 @@
 ---
 date: 2026-10-27
 order: 1793121702252
-time: 1:21 PM
+time: 10:21 AM
 source: obsidian
 ---
 
